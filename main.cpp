@@ -24,7 +24,7 @@
 #include "shaders/spriteShader.h"
 
 int windowWidth, windowHeight, sizePerSquare = 20.f;
-int ghost_amount = 5;
+int ghost_amount = 10;
 
 std::string filePath = "../../../../levels/level0"; //CHANGE THIS IF YOU WANT TO LOAD A DIFFERENT MAP
 
@@ -53,6 +53,7 @@ int main() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); // 4
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // 3 => 4.3
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Demands support for new functions
+	glfwWindowHint(GLFW_SAMPLES, 4); // Anti-aliasing
 
 	// Makes a window and give message if something is wrong
 	GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "Pacman project autumn 2021", NULL, NULL);

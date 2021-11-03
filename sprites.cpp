@@ -155,14 +155,18 @@ GLuint Ghosts::initGhost(time_t seed) {
 	ghost_points = new std::vector<float>;
 
 	std::vector<std::vector<int>> checkArray = Sprites::getMap()->getMapArray();
-	std::pair<float, float> ghostPos;
 	srand(seed);
 
 	//for (int i = 0; i < ghost_amount; i++) {
-		do {		// Gets random positions for the ghosts
-			ghostPos = Sprites::getMap()->getScreenCoords((rand() % Sprites::getMap()->getWidth())+0.5f, (rand() % Sprites::getMap()->getHeight())-0.5f);
-		} while (checkArray[floor(ghostPos.second)][floor(ghostPos.first)] != 0);
-		sprite_positions.push_back(ghostPos);
+
+		int ghostSpawnX, ghostSpawnY;
+		do { // Gets random positions for the ghosts
+			ghostSpawnX = rand() % Sprites::getMap()->getWidth();										
+			ghostSpawnY = rand() % Sprites::getMap()->getHeight();
+		} while (checkArray[ghostSpawnY][ghostSpawnX] != 0);
+
+		sprite_positions.push_back(getMap()->getScreenCoords(ghostSpawnX + 0.5f, ghostSpawnY - 0.5f));
+
 		sprite_velX.push_back(0.f);
 		sprite_velY.push_back(0.f);
 
@@ -236,7 +240,6 @@ void Ghosts::movement(GLFWwindow* window, double dt, bool gameStatus, time_t see
 		srand(seed);
 
 		for (int i = 0; i < sprite_positions.size(); i++) {
-			
 			int random = rand() % 4;
 			switch (random) {
 			case 0:
@@ -267,7 +270,7 @@ void Ghosts::movement(GLFWwindow* window, double dt, bool gameStatus, time_t see
 			}
 
 			ghostAnimate();
-
+		
 			moveAllToShader(sprite_positions.at(i).first, sprite_positions.at(i).second, ghost_Shader);
 		}
 	}

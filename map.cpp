@@ -154,7 +154,7 @@ void Map::fromFile(std::ifstream& in) {
  */
 std::pair<float, float> Map::getScreenCoords(float tileX, float tileY) {
 	return std::pair<float, float> { mapStartX + tileX,
-		mapStartY + (height - 1 - tileY) };
+									 mapStartY + (height - 1 - tileY) };
 }
 
 /**
