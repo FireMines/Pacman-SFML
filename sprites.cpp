@@ -473,8 +473,8 @@ bool Pacman::movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts
 	//std::cout << cameraFront.x << ' ' << cameraFront.y << ' ' << cameraFront.z << std::endl;
 	std::cout << Sprites::getDirection() << std::endl;
 	if (!checkIfGameIsDone(gameDone)) {
-		switch (Sprites::getViewDir()){ 
-		case 'U':
+		switch (Sprites::getViewDir()){			//Sets movement based on the direction the player is facing
+		case 'U':								// U = UP (North), R = RIGHT (East), D = DOWN (South), L = LEFT (West)
 			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 				previousDir = Sprites::getDirection();
 				Sprites::setDirection('D');
@@ -644,50 +644,6 @@ bool Pacman::movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts
 			break;
 		default:	break;
 		}
-
-
-		/*if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-			previousDir = Sprites::getDirection();
-			Sprites::setDirection('U');
-			if (!checkWallCollision(pacPos2.first + 0 * dt, pacPos2.second - 1.f + Sprites::getSpeed() * dt)) {
-				velX = 0;
-				velY = Sprites::getSpeed();
-			}
-			else
-				Sprites::setDirection(previousDir);
-		}
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-			previousDir = Sprites::getDirection();
-			Sprites::setDirection('D');
-			if (!checkWallCollision(pacPos2.first + 0 * dt, pacPos2.second - 1.f - Sprites::getSpeed() * dt)) {
-				velX = 0;
-				velY = -Sprites::getSpeed();
-			}
-			else
-				Sprites::setDirection(previousDir);
-		}
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-			previousDir = Sprites::getDirection();
-			Sprites::setDirection('R');
-			if (!checkWallCollision(pacPos2.first + Sprites::getSpeed() * dt, pacPos2.second - 1.f + 0 * dt)) {
-				velX = Sprites::getSpeed();
-				velY = 0;
-			}
-			else
-				Sprites::setDirection(previousDir);
-		}
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-			previousDir = Sprites::getDirection();
-			Sprites::setDirection('L');
-			if (!checkWallCollision(pacPos2.first - Sprites::getSpeed() * dt, pacPos2.second - 1.f + 0 * dt)) {
-				velX = -Sprites::getSpeed();
-				velY = 0;
-			}
-			else
-				Sprites::setDirection(previousDir);
-		}*/
-		
-		
 
 		if (!checkWallCollision(pacPos2.first + velX * dt, pacPos2.second - 1.f + velY * dt)) {
 			pacPos2.first += velX * dt;
