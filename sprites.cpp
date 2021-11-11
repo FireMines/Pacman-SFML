@@ -470,8 +470,7 @@ bool Pacman::movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts
 	bool gameDone = gameStatus;
 	char previousDir = ' ';
 	findCameraDirection();
-	//std::cout << cameraFront.x << ' ' << cameraFront.y << ' ' << cameraFront.z << std::endl;
-	std::cout << Sprites::getDirection() << std::endl;
+	//std::cout << Sprites::getDirection() << std::endl;
 	if (!checkIfGameIsDone(gameDone)) {
 		switch (Sprites::getViewDir()){			//Sets movement based on the direction the player is facing
 		case 'U':								// U = UP (North), R = RIGHT (East), D = DOWN (South), L = LEFT (West)

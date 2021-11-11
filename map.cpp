@@ -232,6 +232,9 @@ void Map::initVerts() {
 	// Makes the Vertex Array Object
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
+	float wallHeight = 2.5f;
+	int i = 0;
+	indices = new std::vector<unsigned int>;
 
 	// Makes the Vertex Buffer Objecy
 	points = new std::vector<float>;
@@ -245,33 +248,165 @@ void Map::initVerts() {
 			if (mapArr[y][x] == 1) isBlue = 1.f;		
 
 			/* Tile wall */
-			// Bottom left
-			points->push_back(botLeft.first);
-			points->push_back(botLeft.second);
-			points->push_back(0.f);
+			/*
+			// South Left FLOOR
+			points->push_back(botLeft.first); points->push_back(botLeft.second); points->push_back(0.f);	//X, Y and Z Coordinates
+			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);						//RGB
+			points->push_back(0.f);	points->push_back(0.f);													//Tex coords
+
+			// South Right FLOOR
+			points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(0.f);
 			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
 			points->push_back(0.f);	points->push_back(0.f);
 
-			// Bottom right
-			points->push_back(botLeft.first + tileSize);
-			points->push_back(botLeft.second);
-			points->push_back(0.f);
+			// North Left FLOOR
+			points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second + tileSize); points->push_back(0.f);
 			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
 			points->push_back(0.f);	points->push_back(0.f);
 
-			// Top right
-			points->push_back(botLeft.first + tileSize);
-			points->push_back(botLeft.second + tileSize);
-			points->push_back(0.f);
+			// North Right FLOOR
+			points->push_back(botLeft.first); points->push_back(botLeft.second + tileSize); points->push_back(0.f);
 			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
 			points->push_back(0.f);	points->push_back(0.f);
 
-			// Top left
-			points->push_back(botLeft.first);
-			points->push_back(botLeft.second + tileSize);
-			points->push_back(0.f);
-			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
-			points->push_back(0.f);	points->push_back(0.f);
+			// -----FLOOR TILES INDICES-----
+
+			indices->push_back(i + 0);
+			indices->push_back(i + 1);	
+			indices->push_back(i + 3);	
+
+			indices->push_back(i + 1);
+			indices->push_back(i + 2);	
+			indices->push_back(i + 3);
+			i += 4;
+			*/
+			// DRAW WALLS IF IT IS A WALL TILE
+			if (isBlue == 1.0f) {
+
+				// South
+				// South FLOOR L
+				points->push_back(botLeft.first); points->push_back(botLeft.second); points->push_back(0.f);	//X, Y and Z Coordinates
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);						//RGB
+				points->push_back(0.f);	points->push_back(0.f);													//Tex coords
+
+				// South FLOOR R
+				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(0.f);
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+				points->push_back(0.f);	points->push_back(0.f);
+
+				// South ROOF L 
+				points->push_back(botLeft.first); points->push_back(botLeft.second); points->push_back(wallHeight);	//X, Y and Z Coordinates
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);							//RGB
+				points->push_back(0.f);	points->push_back(0.f);														//Tex coords
+
+				// South ROOF R
+				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(wallHeight);
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+				points->push_back(0.f);	points->push_back(0.f);
+
+				// South Indices
+				indices->push_back(i + 0);
+				indices->push_back(i + 1);
+				indices->push_back(i + 2);
+
+				indices->push_back(i + 1);
+				indices->push_back(i + 2);
+				indices->push_back(i + 3);
+				i += 4;
+
+				// North
+				// North Left FLOOR
+				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second + tileSize); points->push_back(0.f);
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+				points->push_back(0.f);	points->push_back(0.f);
+
+				// North Right FLOOR
+				points->push_back(botLeft.first); points->push_back(botLeft.second + tileSize); points->push_back(0.f);
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+				points->push_back(0.f);	points->push_back(0.f);
+
+				// North Left ROOF
+				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second + tileSize); points->push_back(wallHeight);
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+				points->push_back(0.f);	points->push_back(0.f);
+
+				// North Right ROOF
+				points->push_back(botLeft.first); points->push_back(botLeft.second + tileSize); points->push_back(wallHeight);
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+				points->push_back(0.f);	points->push_back(0.f);
+
+				// North Indices
+				indices->push_back(i + 0);
+				indices->push_back(i + 1);
+				indices->push_back(i + 2);
+
+				indices->push_back(i + 1);
+				indices->push_back(i + 2);
+				indices->push_back(i + 3);
+				i += 4;
+
+				// East
+				// South FLOOR L
+				points->push_back(botLeft.first); points->push_back(botLeft.second); points->push_back(0.f);	//X, Y and Z Coordinates
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);						//RGB
+				points->push_back(0.f);	points->push_back(0.f);													//Tex coords
+
+				// North Right FLOOR
+				points->push_back(botLeft.first); points->push_back(botLeft.second + tileSize); points->push_back(0.f);
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+				points->push_back(0.f);	points->push_back(0.f);
+
+				// South ROOF L 
+				points->push_back(botLeft.first); points->push_back(botLeft.second); points->push_back(wallHeight);	//X, Y and Z Coordinates
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);							//RGB
+				points->push_back(0.f);	points->push_back(0.f);														//Tex coords
+
+				// North Right ROOF
+				points->push_back(botLeft.first); points->push_back(botLeft.second + tileSize); points->push_back(wallHeight);
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+				points->push_back(0.f);	points->push_back(0.f);
+
+				// East Indices
+				indices->push_back(i + 0);
+				indices->push_back(i + 1);
+				indices->push_back(i + 2);
+
+				indices->push_back(i + 1);
+				indices->push_back(i + 2);
+				indices->push_back(i + 3);
+				i += 4;
+
+				// West
+				// South FLOOR R
+				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(0.f);
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+				points->push_back(0.f);	points->push_back(0.f);
+
+				// North Left FLOOR
+				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second + tileSize); points->push_back(0.f);
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+				points->push_back(0.f);	points->push_back(0.f);
+
+				// South ROOF R
+				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(wallHeight);
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+				points->push_back(0.f);	points->push_back(0.f);
+
+				// North Left ROOF
+				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second + tileSize); points->push_back(wallHeight);
+				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+				points->push_back(0.f);	points->push_back(0.f);
+
+				// West Indices
+				indices->push_back(i + 0);
+				indices->push_back(i + 1);
+				indices->push_back(i + 2);
+
+				indices->push_back(i + 1);
+				indices->push_back(i + 2);
+				indices->push_back(i + 3);
+				i += 4;
+			}
 		}
 	}
 
@@ -291,17 +426,18 @@ void Map::initVerts() {
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 6) );
 
+	/*
 	// Connects indices to points to make two triangles
 	indices = new std::vector<unsigned int>;
 	for (int i = 0; i < width * height; i++) {
 		indices->push_back(i*4 + 0);	// i=1 => 4
 		indices->push_back(i*4 + 1);	// i=1 => 5
-		indices->push_back(i*4 + 3);	// i=1 => 7
+		indices->push_back(i*4 + 2);	// i=1 => 7
 
 		indices->push_back(i*4 + 1);	// i=1 => 5
 		indices->push_back(i*4 + 2);	// i=1 => 6
 		indices->push_back(i*4 + 3);	// i=1 => 7
-	}
+	}*/
 
 	// Element buffer object
 	glGenBuffers(1, &ebo); 

@@ -84,9 +84,6 @@ int main() {
 	GLuint sprite_shaderprogram = CompileShader(spriteVertexShaderSrc,
 		spriteFragmentShaderSrc);
 
-	
-
-
 	double currentTime = 0.0;	// Sets a current time variable
 	glfwSetTime(0.0);			// Resets time
 
@@ -127,9 +124,15 @@ int main() {
 		glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
 		glViewport(0, 0, windowWidth, windowHeight);
 
+
 		// Clear screen with white
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-		glClear(GL_COLOR_BUFFER_BIT);
+		
+		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_DEPTH_TEST);
 
 		// Draws items on the screen
 		glUseProgram(shader_program);		// Tells our code which shader program we use
