@@ -31,11 +31,14 @@ std::string filePath = "../../../../levels/level0"; //CHANGE THIS IF YOU WANT TO
 void Camera					(const GLuint shaderprogram);
 void setWindowSize			(std::string filePath);
 void error_callback			(int error, const char* description);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+
 
 static void key_callback	(GLFWwindow* window, int key, int scancode, int action, int mods);
 
 GLuint CompileShader		(const std::string& vertexShader, const std::string& fragmentShader);
 GLuint load_opengl_texture	(const std::string& filepath, GLuint slot);
+std::vector<Pacman*> gPacman;		//vector onlyincludeing pacman
 
 
 /**
@@ -70,6 +73,7 @@ int main() {
 
 	// Tells openGL which callback functions we use
 	glfwSetKeyCallback(window, key_callback);
+	glfwSetCursorPosCallback(window, mouse_callback);
 
 
 	// Combines shaders to a single shader program
@@ -90,6 +94,7 @@ int main() {
 	Map map(filePath);
 	//Sprites pacman(&map, sprite_shaderprogram, ghost_shaderprogram);
 	Pacman pacman(&map, sprite_shaderprogram);
+	gPacman.push_back(&pacman);
 	
 
 	auto spriteSheet = load_opengl_texture("assets/pacman.png", 0);
@@ -153,7 +158,6 @@ int main() {
 
 		Camera(shader_program);
 		Camera(sprite_shaderprogram);
-		
 
 		// Updates
 		glfwPollEvents();
@@ -176,15 +180,26 @@ int main() {
 // Code handling the camera
 // -----------------------------------------------------------------------------
 void Camera(const GLuint shaderprogram) {
+
+	//Mouse implimentation
+// camera
+	glm::vec3 cameraPos = glm::vec3(14.f, 18.f, 50.f);
+	glm::vec3 cameraFront = gPacman[0]->getCameraFront();
+	glm::vec3 cameraUp = glm::vec3(0.f, 1.f, 0.f);
+
+
+
 	glUseProgram(shaderprogram);
 
 	//Matrix which helps project our 3D objects onto a 2D image. Not as relevant in 2D projects
 	//The numbers here represent the aspect ratio. Since our window is a square, aspect ratio here is 1:1, but this can be changed.
-	glm::mat4 projection = glm::ortho(0.f, 28.f, 0.f, 36.f);
+	//glm::mat4 projection = glm::ortho(0.f, 28.f, 0.f, 36.f);
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 0.1f, 100.0f);
+	//glm::mat4 projection = glm::perspective(90.f, 1.f, 0.1f, 60.f);
 
 	//Matrix which defines where in the scene our camera is
 	//                           Position of camera     Direction camera is looking     Vector pointing upwards
-	glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 1), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	glm::mat4 view = glm::lookAt(cameraPos, (cameraPos + cameraFront), cameraUp);
 
 	//Get unforms to place our matrices into
 	GLuint projmat = glGetUniformLocation(shaderprogram, "u_ProjectionMat");
@@ -193,6 +208,12 @@ void Camera(const GLuint shaderprogram) {
 	//Send data from matrices to uniform
 	glUniformMatrix4fv(projmat, 1, false, glm::value_ptr(projection));
 	glUniformMatrix4fv(viewmat, 1, false, glm::value_ptr(view));
+}
+
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos){
+	
+	gPacman[0]->updateCamera(xpos, ypos);
 }
 
 // -----------------------------------------------------------------------------

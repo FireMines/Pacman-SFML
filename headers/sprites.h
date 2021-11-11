@@ -7,12 +7,14 @@
 #include <iostream>
 #include <string>
 
+#include <glm/glm.hpp>
+
 
 class Sprites {
 private:
 	float								speed = 5.f;
 	Map* map;
-	int									movementAnimation = 0;
+	int									movementAnimation = 20;
 	char								direction = ' ';
 public:
 	Sprites						(Map* map);
@@ -26,7 +28,7 @@ public:
 	int	  getMovAni()				{ return movementAnimation; }
 	void  setDirection(char dir)	{ direction = dir; }
 	void  setMovAni(int newMovAni)	{ movementAnimation = newMovAni; }
-	char getDirection()				{ return direction; }
+	char  getDirection()			{ return direction; }
 
 	void moveAllToShader(float offsetX, float offsetY, GLuint shaderprogram);
 
@@ -90,6 +92,14 @@ private:
 										velX = 0.f,
 										velY = 0.f;
 	bool								increaseStep = true;
+	bool								firstMouse = true;
+
+	float								yaw = 0.0f;    // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+	float								pitch = 0.0f;
+	float								lastX = 0;
+	float								lastY = 0;
+	float								fov = 40.0f;
+	glm::vec3							cameraFront = glm::vec3(0.f, 0.f, -50.f);
 
 public:
 	Pacman(Map* map, GLuint shader);
@@ -104,6 +114,9 @@ public:
 	bool checkPelletCollision(std::pair<int, int> currentTile);
 
 	GLuint initPacman();
+
+	void updateCamera(double xpos, double ypos);
+	glm::vec3 getCameraFront() { return cameraFront; }
 
 };
 #endif // !sprites_h
