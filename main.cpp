@@ -24,7 +24,7 @@
 #include "shaders/spriteShader.h"
 
 int windowWidth, windowHeight, sizePerSquare = 20.f;
-int ghost_amount = 10;
+int ghost_amount = 0;
 
 std::string filePath = "../../../../levels/level0"; //CHANGE THIS IF YOU WANT TO LOAD A DIFFERENT MAP
 
@@ -74,6 +74,7 @@ int main() {
 	// Tells openGL which callback functions we use
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
 	// Combines shaders to a single shader program
@@ -183,9 +184,9 @@ void Camera(const GLuint shaderprogram) {
 
 	//Mouse implimentation
 // camera
-	glm::vec3 cameraPos = glm::vec3(14.f, 18.f, 50.f);
+	glm::vec3 cameraPos = glm::vec3(gPacman[0]->getPacPos().first, gPacman[0]->getPacPos().second, 1.f);
 	glm::vec3 cameraFront = gPacman[0]->getCameraFront();
-	glm::vec3 cameraUp = glm::vec3(0.f, 1.f, 0.f);
+	glm::vec3 cameraUp = glm::vec3(0.f, 0.f, 1.f);
 
 
 

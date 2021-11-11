@@ -248,22 +248,30 @@ void Map::initVerts() {
 			// Bottom left
 			points->push_back(botLeft.first);
 			points->push_back(botLeft.second);
+			points->push_back(0.f);
 			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+			points->push_back(0.f);	points->push_back(0.f);
 
 			// Bottom right
 			points->push_back(botLeft.first + tileSize);
 			points->push_back(botLeft.second);
+			points->push_back(0.f);
 			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+			points->push_back(0.f);	points->push_back(0.f);
 
 			// Top right
 			points->push_back(botLeft.first + tileSize);
 			points->push_back(botLeft.second + tileSize);
+			points->push_back(0.f);
 			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+			points->push_back(0.f);	points->push_back(0.f);
 
 			// Top left
 			points->push_back(botLeft.first);
 			points->push_back(botLeft.second + tileSize);
+			points->push_back(0.f);
 			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
+			points->push_back(0.f);	points->push_back(0.f);
 		}
 	}
 
@@ -273,11 +281,15 @@ void Map::initVerts() {
 
 	// location=0 -> position
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float)*0) );
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 0) );
 
 	// location=1 -> Color
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float)*2) );
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 3) );
+
+	// location = 2 -> textures
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 6) );
 
 	// Connects indices to points to make two triangles
 	indices = new std::vector<unsigned int>;

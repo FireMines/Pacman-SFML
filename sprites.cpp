@@ -469,8 +469,184 @@ GLuint Pacman::initPacman() {
 bool Pacman::movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts, bool gameStatus) {
 	bool gameDone = gameStatus;
 	char previousDir = ' ';
+	findCameraDirection();
+	//std::cout << cameraFront.x << ' ' << cameraFront.y << ' ' << cameraFront.z << std::endl;
+	std::cout << Sprites::getDirection() << std::endl;
 	if (!checkIfGameIsDone(gameDone)) {
-		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+		switch (Sprites::getViewDir()){ 
+		case 'U':
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('D');
+				if (!checkWallCollision(pacPos2.first + 0 * dt, pacPos2.second - 1.f - Sprites::getSpeed() * dt)) {
+					velX = 0;
+					velY = -Sprites::getSpeed();
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('U');
+				if (!checkWallCollision(pacPos2.first + 0 * dt, pacPos2.second - 1.f + Sprites::getSpeed() * dt)) {
+					velX = 0;
+					velY = Sprites::getSpeed();
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('L');
+				if (!checkWallCollision(pacPos2.first - Sprites::getSpeed() * dt, pacPos2.second - 1.f + 0 * dt)) {
+					velX = -Sprites::getSpeed();
+					velY = 0;
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('R');
+				if (!checkWallCollision(pacPos2.first + Sprites::getSpeed() * dt, pacPos2.second - 1.f + 0 * dt)) {
+					velX = Sprites::getSpeed();
+					velY = 0;
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			break;
+		case 'D':
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('U');
+				if (!checkWallCollision(pacPos2.first + 0 * dt, pacPos2.second - 1.f + Sprites::getSpeed() * dt)) {
+					velX = 0;
+					velY = Sprites::getSpeed();
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('D');
+				if (!checkWallCollision(pacPos2.first + 0 * dt, pacPos2.second - 1.f - Sprites::getSpeed() * dt)) {
+					velX = 0;
+					velY = -Sprites::getSpeed();
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('R');
+				if (!checkWallCollision(pacPos2.first + Sprites::getSpeed() * dt, pacPos2.second - 1.f + 0 * dt)) {
+					velX = Sprites::getSpeed();
+					velY = 0;
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('L');
+				if (!checkWallCollision(pacPos2.first - Sprites::getSpeed() * dt, pacPos2.second - 1.f + 0 * dt)) {
+					velX = -Sprites::getSpeed();
+					velY = 0;
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			break;
+		case 'R':	
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('R');
+				if (!checkWallCollision(pacPos2.first + Sprites::getSpeed() * dt, pacPos2.second - 1.f + 0 * dt)) {
+					velX = Sprites::getSpeed();
+					velY = 0;
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('L');
+				if (!checkWallCollision(pacPos2.first - Sprites::getSpeed() * dt, pacPos2.second - 1.f + 0 * dt)) {
+					velX = -Sprites::getSpeed();
+					velY = 0;
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('D');
+				if (!checkWallCollision(pacPos2.first + 0 * dt, pacPos2.second - 1.f - Sprites::getSpeed() * dt)) {
+					velX = 0;
+					velY = -Sprites::getSpeed();
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('U');
+				if (!checkWallCollision(pacPos2.first + 0 * dt, pacPos2.second - 1.f + Sprites::getSpeed() * dt)) {
+					velX = 0;
+					velY = Sprites::getSpeed();
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			break;
+		case 'L':	
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('L');
+				if (!checkWallCollision(pacPos2.first - Sprites::getSpeed() * dt, pacPos2.second - 1.f + 0 * dt)) {
+					velX = -Sprites::getSpeed();
+					velY = 0;
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('R');
+				if (!checkWallCollision(pacPos2.first + Sprites::getSpeed() * dt, pacPos2.second - 1.f + 0 * dt)) {
+					velX = Sprites::getSpeed();
+					velY = 0;
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('U');
+				if (!checkWallCollision(pacPos2.first + 0 * dt, pacPos2.second - 1.f + Sprites::getSpeed() * dt)) {
+					velX = 0;
+					velY = Sprites::getSpeed();
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+				previousDir = Sprites::getDirection();
+				Sprites::setDirection('D');
+				if (!checkWallCollision(pacPos2.first + 0 * dt, pacPos2.second - 1.f - Sprites::getSpeed() * dt)) {
+					velX = 0;
+					velY = -Sprites::getSpeed();
+				}
+				else
+					Sprites::setDirection(previousDir);
+			}
+			break;
+		default:	break;
+		}
+
+
+		/*if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 			previousDir = Sprites::getDirection();
 			Sprites::setDirection('U');
 			if (!checkWallCollision(pacPos2.first + 0 * dt, pacPos2.second - 1.f + Sprites::getSpeed() * dt)) {
@@ -480,7 +656,7 @@ bool Pacman::movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts
 			else
 				Sprites::setDirection(previousDir);
 		}
-		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 			previousDir = Sprites::getDirection();
 			Sprites::setDirection('D');
 			if (!checkWallCollision(pacPos2.first + 0 * dt, pacPos2.second - 1.f - Sprites::getSpeed() * dt)) {
@@ -490,7 +666,7 @@ bool Pacman::movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts
 			else
 				Sprites::setDirection(previousDir);
 		}
-		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 			previousDir = Sprites::getDirection();
 			Sprites::setDirection('R');
 			if (!checkWallCollision(pacPos2.first + Sprites::getSpeed() * dt, pacPos2.second - 1.f + 0 * dt)) {
@@ -500,7 +676,7 @@ bool Pacman::movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts
 			else
 				Sprites::setDirection(previousDir);
 		}
-		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 			previousDir = Sprites::getDirection();
 			Sprites::setDirection('L');
 			if (!checkWallCollision(pacPos2.first - Sprites::getSpeed() * dt, pacPos2.second - 1.f + 0 * dt)) {
@@ -509,7 +685,7 @@ bool Pacman::movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts
 			}
 			else
 				Sprites::setDirection(previousDir);
-		}
+		}*/
 		
 		
 
@@ -604,6 +780,16 @@ void Pacman::pacAnimate() {
 }
 
 /**
+*	find and sets direction of camera
+*/
+void Pacman::findCameraDirection() {
+	if		(cameraFront.x > -0.5f && cameraFront.x < 0.5f && cameraFront.y < 0) Sprites::setViewDirection('U');
+	else if (cameraFront.x > -0.5f && cameraFront.x < 0.5f && cameraFront.y > 0) Sprites::setViewDirection('D');
+	else if (cameraFront.y > -0.5f && cameraFront.y < 0.5f && cameraFront.x > 0) Sprites::setViewDirection('R');
+	else if (cameraFront.y > -0.5f && cameraFront.y < 0.5f && cameraFront.x < 0) Sprites::setViewDirection('L');
+}
+
+/**
  *	Updates the firstperson camera on pacman
  */
 void Pacman::updateCamera(double xpos, double ypos) {
@@ -631,16 +817,11 @@ void Pacman::updateCamera(double xpos, double ypos) {
 		pitch = 89.0f;
 	if (pitch < -89.0f)
 		pitch = -89.0f;
-	//pitch = pitchChange,
-	//lastX = xChange,
-	//lastY = yChange,
-	//fov   = fovChange;
-
 
 	glm::vec3 direction;
-	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	direction.y = sin(glm::radians(pitch));
-	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.z = sin(glm::radians(pitch));
+	direction.x = -cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+	direction.y = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	cameraFront = glm::normalize(direction);
 
 }
