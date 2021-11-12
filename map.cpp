@@ -287,17 +287,17 @@ void Map::initVerts() {
 				// South FLOOR R
 				points->push_back(botLeft.first); points->push_back(botLeft.second); points->push_back(0.f);	//X, Y and Z Coordinates
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);						//RGB
-				points->push_back(0.f);	points->push_back(0.f);													//Tex coords
+				points->push_back(1.f);	points->push_back(1.f);													//Tex coords
 
 				// South FLOOR L
 				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(0.f);
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
-				points->push_back(0.f);	points->push_back(0.f);
+				points->push_back(0.f);	points->push_back(1.f);
 
 				// South ROOF R 
 				points->push_back(botLeft.first); points->push_back(botLeft.second); points->push_back(wallHeight);	//X, Y and Z Coordinates
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);							//RGB
-				points->push_back(0.f);	points->push_back(0.f);														//Tex coords
+				points->push_back(1.f);	points->push_back(0.f);														//Tex coords
 
 				// South ROOF L
 				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(wallHeight);
@@ -318,17 +318,17 @@ void Map::initVerts() {
 				// North Left FLOOR
 				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second + tileSize); points->push_back(0.f);
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
-				points->push_back(0.f);	points->push_back(0.f);
+				points->push_back(1.f);	points->push_back(1.f);
 
 				// North Right FLOOR
 				points->push_back(botLeft.first); points->push_back(botLeft.second + tileSize); points->push_back(0.f);
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
-				points->push_back(0.f);	points->push_back(0.f);
+				points->push_back(0.f);	points->push_back(1.f);
 
 				// North Left ROOF
 				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second + tileSize); points->push_back(wallHeight);
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
-				points->push_back(0.f);	points->push_back(0.f);
+				points->push_back(1.f);	points->push_back(0.f);
 
 				// North Right ROOF
 				points->push_back(botLeft.first); points->push_back(botLeft.second + tileSize); points->push_back(wallHeight);
@@ -349,17 +349,17 @@ void Map::initVerts() {
 				// South FLOOR L
 				points->push_back(botLeft.first); points->push_back(botLeft.second); points->push_back(0.f);	//X, Y and Z Coordinates
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);						//RGB
-				points->push_back(0.f);	points->push_back(0.f);													//Tex coords
+				points->push_back(1.f);	points->push_back(1.f);													//Tex coords
 
 				// North Right FLOOR
 				points->push_back(botLeft.first); points->push_back(botLeft.second + tileSize); points->push_back(0.f);
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
-				points->push_back(0.f);	points->push_back(0.f);
+				points->push_back(0.f);	points->push_back(1.f);
 
 				// South ROOF L 
 				points->push_back(botLeft.first); points->push_back(botLeft.second); points->push_back(wallHeight);	//X, Y and Z Coordinates
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);							//RGB
-				points->push_back(0.f);	points->push_back(0.f);														//Tex coords
+				points->push_back(1.f);	points->push_back(0.f);														//Tex coords
 
 				// North Right ROOF
 				points->push_back(botLeft.first); points->push_back(botLeft.second + tileSize); points->push_back(wallHeight);
@@ -380,17 +380,17 @@ void Map::initVerts() {
 				// South FLOOR L
 				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(0.f);
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
-				points->push_back(0.f);	points->push_back(0.f);
+				points->push_back(1.f);	points->push_back(1.f);
 
 				// North Left FLOOR
 				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second + tileSize); points->push_back(0.f);
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
-				points->push_back(0.f);	points->push_back(0.f);
+				points->push_back(0.f);	points->push_back(1.f);
 
 				// South ROOF L
 				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(wallHeight);
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
-				points->push_back(0.f);	points->push_back(0.f);
+				points->push_back(1.f);	points->push_back(0.f);
 
 				// North Left ROOF
 				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second + tileSize); points->push_back(wallHeight);

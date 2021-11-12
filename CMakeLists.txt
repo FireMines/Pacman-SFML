@@ -98,3 +98,9 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_SOURCE_DIR}/assets/pacman.png
   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/pacman.png)
+
+  add_custom_command(
+  TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_SOURCE_DIR}/assets/walls.png
+  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/walls.png)

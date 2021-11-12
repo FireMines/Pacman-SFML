@@ -31,7 +31,7 @@ std::string filePath = "../../../../levels/level0"; //CHANGE THIS IF YOU WANT TO
 void Camera					(const GLuint shaderprogram);
 void setWindowSize			(std::string filePath);
 void error_callback			(int error, const char* description);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void mouse_callback			(GLFWwindow* window, double xpos, double ypos);
 
 
 static void key_callback	(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -58,6 +58,7 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // Demands support for new functions
 	glfwWindowHint(GLFW_SAMPLES, 4); // Anti-aliasing
 
+
 	// Makes a window and give message if something is wrong
 	GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "Pacman project autumn 2021", NULL, NULL);
 	if (window == NULL) { // If window doesnt open or it detects a fault
@@ -65,6 +66,9 @@ int main() {
 		glfwTerminate();
 		return -1;
 	}
+	glfwSetWindowAspectRatio(window, windowWidth, windowHeight);
+
+
 
 	// Sets the 'context' to be our window
 	// Tells it to draw stuff on 'window'
@@ -96,6 +100,7 @@ int main() {
 	
 
 	auto spriteSheet = load_opengl_texture("assets/pacman.png", 0);
+	auto wallTexture = load_opengl_texture("assets/walls.png", 0);
 
 	// Create a texture coordinate as an aditional attribute for the square vertices
 	auto pacmanVAO = pacman.initPacman();
@@ -112,9 +117,20 @@ int main() {
 	}
 
 	bool gameDone = false;		// true if game is done 
-
+	bool fullscreen = false;
 	// 'Gameloopen' 
 	while (!glfwWindowShouldClose(window)) {
+
+		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+			if (!fullscreen) {
+				fullscreen = true;
+				glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), NULL, windowWidth, windowWidth, windowHeight, 60);
+			}
+			else {
+				fullscreen = false;
+				glfwSetWindowMonitor(window, NULL, NULL, windowWidth, windowWidth, windowHeight, 60);
+			}
+		}
 
 		double pastTime = currentTime;
 		currentTime = glfwGetTime();		// Time management
@@ -136,10 +152,15 @@ int main() {
 
 		// Draws items on the screen
 		glUseProgram(shader_program);		// Tells our code which shader program we use
+
+		// Enables textures for the walls
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, wallTexture); 
+
 		map.drawMap();
 
 
-		auto samplerSlotLocation0 = glGetUniformLocation(sprite_shaderprogram, "uTextureA");
+		// auto samplerSlotLocation0 = glGetUniformLocation(sprite_shaderprogram, "uTextureA");
 		glUseProgram(sprite_shaderprogram);
 		glBindVertexArray(pacmanVAO);
 		glActiveTexture(GL_TEXTURE0);
@@ -329,3 +350,4 @@ void setWindowSize(std::string filePath) {
 	windowWidth = windowWidth * sizePerSquare;					//multiplies the amount of tiles with the size for each tile
 	windowHeight = windowHeight * sizePerSquare;
 }
+

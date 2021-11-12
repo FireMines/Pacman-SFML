@@ -90,20 +90,20 @@ private:
 	std::vector<unsigned int>*			pac_indices;
 	std::pair<float, float>				pacPos2;
 
-	int									Step = 0;
-	float								widthX = (1.f / 6.f),	// Each sprite i divided into 6ths on the X axis
-										heightY = (1.f / 4.f),	// divided into 4ths on the Y axis
-										velX = 0.f,
-										velY = 0.f;
-	bool								increaseStep = true;
-	bool								firstMouse = true;
+	int									Step			= 0;
+	float								widthX			= (1.f / 6.f),	// Each sprite i divided into 6ths on the X axis
+										heightY			= (1.f / 4.f),	// divided into 4ths on the Y axis
+										velX			= 0.f,
+										velY			= 0.f;
+	bool								increaseStep	= true;
+	bool								firstMouse		= true;
 
-	float								yaw = 180.0f;    // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
-	float								pitch = 0.0f;
-	float								lastX = 0;
-	float								lastY = 0;
-	float								fov = 40.0f;
-	glm::vec3							cameraFront = glm::vec3(0.f, 0.f, 50.f);
+	float								yaw				= 180.0f;    // yaw is initialized to -90.0 degrees since a yaw of 0.0 results in a direction vector pointing to the right so we initially rotate a bit to the left.
+	float								pitch			= 0.0f;
+	float								lastX			= 0;
+	float								lastY			= 0;
+	float								fov				= 40.0f;
+	glm::vec3							cameraFront		= glm::vec3(0.f, 0.f, 50.f);
 
 public:
 	Pacman(Map* map, GLuint shader);
