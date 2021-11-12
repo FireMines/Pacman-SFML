@@ -284,22 +284,22 @@ void Map::initVerts() {
 			if (isBlue == 1.0f) {
 
 				// South
-				// South FLOOR L
+				// South FLOOR R
 				points->push_back(botLeft.first); points->push_back(botLeft.second); points->push_back(0.f);	//X, Y and Z Coordinates
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);						//RGB
 				points->push_back(0.f);	points->push_back(0.f);													//Tex coords
 
-				// South FLOOR R
+				// South FLOOR L
 				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(0.f);
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
 				points->push_back(0.f);	points->push_back(0.f);
 
-				// South ROOF L 
+				// South ROOF R 
 				points->push_back(botLeft.first); points->push_back(botLeft.second); points->push_back(wallHeight);	//X, Y and Z Coordinates
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);							//RGB
 				points->push_back(0.f);	points->push_back(0.f);														//Tex coords
 
-				// South ROOF R
+				// South ROOF L
 				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(wallHeight);
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
 				points->push_back(0.f);	points->push_back(0.f);
@@ -377,7 +377,7 @@ void Map::initVerts() {
 				i += 4;
 
 				// West
-				// South FLOOR R
+				// South FLOOR L
 				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(0.f);
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
 				points->push_back(0.f);	points->push_back(0.f);
@@ -387,7 +387,7 @@ void Map::initVerts() {
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
 				points->push_back(0.f);	points->push_back(0.f);
 
-				// South ROOF R
+				// South ROOF L
 				points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(wallHeight);
 				points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
 				points->push_back(0.f);	points->push_back(0.f);
