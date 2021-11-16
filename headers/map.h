@@ -56,7 +56,7 @@ private:
 	std::vector<float>*					points;
 	std::vector<unsigned int>*			indices;
 
-	int									p_slices	= 8,		// Amount of 'slices' that a pellet's circle contains
+	int									p_slices	= 10,		// Amount of 'slices' that a pellet's circle contains
 										p_count		= 0;		// Counts total pellets created
 	float								p_radius	= 0.25f;	// The radius of a pellet
 	GLuint								p_vbo,

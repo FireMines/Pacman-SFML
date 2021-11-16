@@ -78,7 +78,7 @@ void Map::drawMap() {
 	glDrawElements(GL_TRIANGLES, indices->size(), GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(p_vao);			// Tell the code which VAO to use 
-	glDrawElements(GL_TRIANGLES, 8 +p_indices->size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, 8 + p_indices->size(), GL_UNSIGNED_INT, 0);
 }
 
 /**
@@ -90,7 +90,7 @@ void Map::deletePellet(std::pair<int, int> position) {
 
 	CleanVAO(p_vao);
 
-	int range = p_slices * 15;
+	int range = p_slices * 18;
 	int index = p_positions[position];
 
 	for (int i = index; i < index + range; i++)
@@ -107,11 +107,11 @@ void Map::deletePellet(std::pair<int, int> position) {
 
 	// location=0 -> position
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 0));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 0));
 
 	// location=1 -> Color
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 2));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 2));
 
 	// Element buffer object
 	glGenBuffers(1, &p_ebo);
@@ -168,6 +168,7 @@ void Map::initPellets() {
 
 	glGenVertexArrays(1, &p_vao);
 	glBindVertexArray(p_vao);
+	float levitationHeight = 0.5f;
 
 	// Makes Vertex Buffer Object
 	p_indices = new std::vector<unsigned int>;
@@ -190,14 +191,17 @@ void Map::initPellets() {
 
 				p_points->push_back(origo.first);
 				p_points->push_back(origo.second);
+				p_points->push_back(levitationHeight);
 				p_points->push_back(1.f); p_points->push_back(1.f); p_points->push_back(0.f);
 
 				p_points->push_back(origo.first + cos(deg0) * p_radius);
 				p_points->push_back(origo.second + sin(deg0) * p_radius);
+				p_points->push_back(levitationHeight);
 				p_points->push_back(1.f); p_points->push_back(1.f); p_points->push_back(0.f);
 
 				p_points->push_back(origo.first + cos(deg) * p_radius);
 				p_points->push_back(origo.second + sin(deg) * p_radius);
+				p_points->push_back(levitationHeight);
 				p_points->push_back(1.f); p_points->push_back(1.f); p_points->push_back(0.f);
 
 				p_indices->push_back(p_indices->size());
@@ -213,11 +217,11 @@ void Map::initPellets() {
 
 	// location=0 -> position
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 0));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 0));
 
 	// location=1 -> Color
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*)(sizeof(float) * 2));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
 
 	// Element buffer object
 	glGenBuffers(1, &p_ebo);

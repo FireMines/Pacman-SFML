@@ -120,7 +120,7 @@ int main() {
 	bool fullscreen = false;
 	// 'Gameloopen' 
 	while (!glfwWindowShouldClose(window)) {
-
+		/*
 		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
 			if (!fullscreen) {
 				fullscreen = true;
@@ -131,6 +131,7 @@ int main() {
 				glfwSetWindowMonitor(window, NULL, NULL, windowWidth, windowWidth, windowHeight, 60);
 			}
 		}
+		*/
 
 		double pastTime = currentTime;
 		currentTime = glfwGetTime();		// Time management
