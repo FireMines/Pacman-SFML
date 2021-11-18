@@ -26,6 +26,19 @@ void main() {
 }
 )";
 
+static const std::string spriteGeometryShaderSrc = R"(
+#version 430 core
+
+layout (points) in;
+layout (points, max_verticies = 1) out;
+
+void main(){
+	gl_Position = gl_in[0].gl_Position;
+	EmitVertex();
+	EndPrimitive();
+}
+)";
+
 static const std::string spriteFragmentShaderSrc = R"(
 #version 430 core
 
@@ -64,13 +77,27 @@ void main() {
 	gl_Position = u_ProjectionMat * u_ViewMat * u_TransformationMat * vec4(aPos, 1.0f);
 	vColor		= vec4(aColor, 1.0f);
 	TexCoords	= inTexCoords;
+	
+}
+)";
+
+static const std::string mapGeometryShaderSrc = R"(
+#version 430 core
+
+layout (points) in;
+layout (points, max_verticies = 1) out;
+
+void main(){
+	gl_Position = gl_in[0].gl_Position;
+	EmitVertex();
+	EndPrimitive();
 }
 )";
 
 static const std::string mapFragmentShaderSrc = R"(
 #version 430 core
 
-// in vec4	vColor;
+in vec4		vColor;
 in vec2		TexCoords;
 
 out vec4	FragColor;
@@ -78,11 +105,119 @@ out vec4	FragColor;
 uniform		sampler2D image;
 
 void main() {		
-		// FragColor = vColor;	
 		vec4 ColorTest = texture(image, TexCoords);
 		FragColor = ColorTest;
+		
 }
 )";
 
+static const std::string pelletVertexShaderSrc = R"(
+#version 430 core
+
+layout (location = 0) in vec3 aPos;
+layout (location = 1) in vec3 aColor;
+
+/**Matixer trengt til kamera og transformasjoner*/
+uniform mat4 u_TransformationMat = mat4(1);
+uniform mat4 u_ViewMat           = mat4(1);
+uniform mat4 u_ProjectionMat     = mat4(1);
+
+out vec4 vColor;
+out mat4 vTransformation;
+
+void main() {
+	/**Posisjon basert på transformations av kamera*/
+	gl_Position = vec4(aPos, 1.0f);
+	vColor		= vec4(aColor, 1.0f);
+	
+	vTransformation = u_ProjectionMat * u_ViewMat * u_TransformationMat;
+}
+)";
+
+static const std::string pelletGeometryShaderSrc = R"(
+#version 430 core
+
+layout (points) in;
+layout (triangle_strip, max_vertices=384) out;
+
+in vec4 vColor[];
+in mat4 vTransformation[];
+
+out vec4 gColor;
+
+void main(){
+	gColor = vColor[0];
+	mat4 gTransform = vTransformation[0];
+
+	float PI = 3.14159265358979323846264;  //unused
+
+    vec4 pos = gl_in[0].gl_Position;  //introduce a single vertex at the origin
+
+
+	float x, y, z, xy; 
+	float radius = 0.05f;
+	int sectorCount = 8;
+	int stackCount = 8;
+
+	float sectorStep = 2 * PI / sectorCount;
+	float stackStep = PI / stackCount;
+	float sectorAngle, stackAngle;
+
+	vec3 spherePos[8][8];
+
+	for(int i = 0; i < stackCount; ++i)
+	{
+		stackAngle = PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
+		xy = radius * cos(stackAngle);             // r * cos(u)
+		z = radius * sin(stackAngle);              // r * sin(u)
+
+		// add (sectorCount+1) vertices per stack
+		// the first and last vertices have same position and normal, but different tex coords
+		for(int j = 0; j <= sectorCount; ++j)
+		{
+			sectorAngle = j * sectorStep;           // starting from 0 to 2pi
+
+			// vertex position (x, y, z)
+			x = xy * cos(sectorAngle);             // r * cos(u) * cos(v)
+			y = xy * sin(sectorAngle);             // r * cos(u) * sin(v)
+			spherePos[j][i] = vec3(x, y, z);
+		}
+	}
+	for(int i = 0; i < stackCount; i++){
+		for(int j = 0; j <= sectorCount; j++){
+			vec3 v0 = spherePos[j][i], 
+				 v1 = spherePos[j+1][i], 
+				 v2 = spherePos[j+1][i+1], 
+				 v3 = spherePos[j][i+1];
+
+			gl_Position = gTransform * vec4(v0.x+pos.x, v0.y+pos.y, v0.z+pos.z, pos.w);
+			EmitVertex();
+			gl_Position = gTransform * vec4(v1.x+pos.x, v1.y+pos.y, v1.z+pos.z, pos.w);
+			EmitVertex();
+			gl_Position = gTransform * vec4(v2.x+pos.x, v2.y+pos.y, v2.z+pos.z, pos.w);
+			EmitVertex();
+
+			gl_Position = gTransform * vec4(v0.x+pos.x, v0.y+pos.y, v0.z+pos.z, pos.w);
+			EmitVertex();
+			gl_Position = gTransform * vec4(v2.x+pos.x, v2.y+pos.y, v2.z+pos.z, pos.w);
+			EmitVertex();
+			gl_Position = gTransform * vec4(v3.x+pos.x, v3.y+pos.y, v3.z+pos.z, pos.w);
+			EmitVertex();
+		}
+	} 
+	EndPrimitive();
+}
+)";
+
+static const std::string pelletFragmentShaderSrc = R"(
+#version 430 core
+
+in vec4		gColor;
+out vec4	FragColor;
+
+void main() {		
+		FragColor = gColor;	
+}
+)";
 
 #endif // __SQUARE_H_

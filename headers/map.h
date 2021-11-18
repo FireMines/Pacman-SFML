@@ -16,6 +16,7 @@ public:
 
 	void CleanVAO			(GLuint& vao);
 	void deletePellet		(std::pair<int, int> position);
+	void drawPellets		();
 	void drawMap			();
 	void fromFile			(std::ifstream& in);
 	void initPellets		();							// Initialiserer pellets

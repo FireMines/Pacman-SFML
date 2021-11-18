@@ -36,7 +36,7 @@ void mouse_callback			(GLFWwindow* window, double xpos, double ypos);
 
 static void key_callback	(GLFWwindow* window, int key, int scancode, int action, int mods);
 
-GLuint CompileShader		(const std::string& vertexShader, const std::string& fragmentShader);
+GLuint CompileShader		(const std::string& vertexShader, const std::string& fragmentShader, const std::string& geometryShader = "");
 GLuint load_opengl_texture	(const std::string& filepath, GLuint slot);
 std::vector<Pacman*> gPacman;		//vector onlyincludeing pacman
 
@@ -85,6 +85,9 @@ int main() {
 	GLuint shader_program = CompileShader(mapVertexShaderSrc,
 		mapFragmentShaderSrc);
 
+	GLuint pellet_shaderprogram = CompileShader(pelletVertexShaderSrc,
+		pelletFragmentShaderSrc, pelletGeometryShaderSrc);
+
 	GLuint sprite_shaderprogram = CompileShader(spriteVertexShaderSrc,
 		spriteFragmentShaderSrc);
 
@@ -120,27 +123,25 @@ int main() {
 	bool fullscreen = false;
 	// 'Gameloopen' 
 	while (!glfwWindowShouldClose(window)) {
-		/*
+		
+		double pastTime = currentTime;
+		currentTime = glfwGetTime();		// Time management
+		double dt = currentTime - pastTime;
+
+		glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
+		glViewport(0, 0, windowWidth, windowHeight);
+
 		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
 			if (!fullscreen) {
 				fullscreen = true;
-				glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), NULL, windowWidth, windowWidth, windowHeight, 60);
+				//glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), NULL, windowWidth, windowWidth, windowHeight, 60);
+				std::cout << glfwGetPrimaryMonitor() << std::endl;
 			}
 			else {
 				fullscreen = false;
 				glfwSetWindowMonitor(window, NULL, NULL, windowWidth, windowWidth, windowHeight, 60);
 			}
 		}
-		*/
-
-		double pastTime = currentTime;
-		currentTime = glfwGetTime();		// Time management
-		double dt = currentTime - pastTime;
-
-
-		glfwGetFramebufferSize(window, &windowWidth, &windowHeight);
-		glViewport(0, 0, windowWidth, windowHeight);
-
 
 		// Clear screen with white
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -157,9 +158,10 @@ int main() {
 		// Enables textures for the walls
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, wallTexture); 
-
 		map.drawMap();
 
+		glUseProgram(pellet_shaderprogram);
+		map.drawPellets();
 
 		// auto samplerSlotLocation0 = glGetUniformLocation(sprite_shaderprogram, "uTextureA");
 		glUseProgram(sprite_shaderprogram);
@@ -183,6 +185,7 @@ int main() {
 		}
 
 		Camera(shader_program);
+		Camera(pellet_shaderprogram);
 		Camera(sprite_shaderprogram);
 
 		// Updates
@@ -213,15 +216,9 @@ void Camera(const GLuint shaderprogram) {
 	glm::vec3 cameraFront = gPacman[0]->getCameraFront();
 	glm::vec3 cameraUp = glm::vec3(0.f, 0.f, 1.f);
 
-
-
 	glUseProgram(shaderprogram);
 
-	//Matrix which helps project our 3D objects onto a 2D image. Not as relevant in 2D projects
-	//The numbers here represent the aspect ratio. Since our window is a square, aspect ratio here is 1:1, but this can be changed.
-	//glm::mat4 projection = glm::ortho(0.f, 28.f, 0.f, 36.f);
 	glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)windowWidth / (float)windowHeight, 0.1f, 100.0f);
-	//glm::mat4 projection = glm::perspective(90.f, 1.f, 0.1f, 60.f);
 
 	//Matrix which defines where in the scene our camera is
 	//                           Position of camera     Direction camera is looking     Vector pointing upwards
@@ -246,43 +243,58 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos){
 // COMPILE SHADER
 // -----------------------------------------------------------------------------
 GLuint CompileShader(const std::string& vertexShaderSrc,
-	const std::string& fragmentShaderSrc) {
+	const std::string& fragmentShaderSrc, const std::string& geometryShaderSrc) {
 
 	auto vertexSrc = vertexShaderSrc.c_str();
 	auto fragmentSrc = fragmentShaderSrc.c_str();
+	auto geometrySrc = geometryShaderSrc.c_str();
 
-	auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexSrc, nullptr);
-	glCompileShader(vertexShader);
+	auto shaderProgram = glCreateProgram();
 
 	int  success;
 	char infoLog[512];
+
+	//create and attach vertex shader
+	auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertexShader, 1, &vertexSrc, nullptr);
+	glCompileShader(vertexShader);
 	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
+	glAttachShader(shaderProgram, vertexShader);
+	glDeleteShader(vertexShader);
 
+	//create and attach geometry shader if not a empty string
+	if (geometryShaderSrc != "") {
+		auto geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+		glShaderSource(geometryShader, 1, &geometrySrc, nullptr);
+		glCompileShader(geometryShader);
+
+		glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &success);
+		if (!success) {
+			glGetShaderInfoLog(geometryShader, 512, NULL, infoLog);
+			std::cout << "ERROR::SHADER::GEOMETRY::COMPILATION_FAILED\n" << infoLog << std::endl;
+		}
+		glAttachShader(shaderProgram, geometryShader);
+		glDeleteShader(geometryShader);
+	}
+
+	//create and attach fragemnt shader
 	auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragmentShader, 1, &fragmentSrc, nullptr);
 	glCompileShader(fragmentShader);
-
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
 		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
-
-	auto shaderProgram = glCreateProgram();
-
-	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
-
+	glDeleteShader(fragmentShader);
+	
 	glLinkProgram(shaderProgram);
 	glUseProgram(shaderProgram);
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
 
 	return shaderProgram;
 }

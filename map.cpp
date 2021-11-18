@@ -29,7 +29,6 @@ Map::~Map() {
 	delete indices;
 
 	delete p_points;
-	delete p_indices;
 	// Rydd opp i vao ebo etc...
 	CleanVAO(vao);
 	CleanVAO(p_vao);
@@ -70,15 +69,20 @@ void Map::CleanVAO(GLuint& vao)
 	glDeleteVertexArrays(1, &vao);
 }
 
+/*
+*	Draw the Pellets
+*/
+void Map::drawPellets() {
+	glBindVertexArray(p_vao);			// Tell the code which VAO to use 
+	glDrawArrays(GL_POINTS, 0 , p_points->size() / 6);
+}
+
 /**
  *	Draws the map
  */
 void Map::drawMap() { 
 	glBindVertexArray(vao);				// Tell the code which VAO to use 
 	glDrawElements(GL_TRIANGLES, indices->size(), GL_UNSIGNED_INT, 0);
-
-	glBindVertexArray(p_vao);			// Tell the code which VAO to use 
-	glDrawElements(GL_TRIANGLES, 8 + p_indices->size(), GL_UNSIGNED_INT, 0);
 }
 
 /**
@@ -88,10 +92,10 @@ void Map::deletePellet(std::pair<int, int> position) {
 	p_active[position.second][position.first] = false;
 	p_count--;
 
-	CleanVAO(p_vao);
-
-	int range = p_slices * 18;
+	int range = 6;
 	int index = p_positions[position];
+
+	/*CleanVAO(p_vao);
 
 	for (int i = index; i < index + range; i++)
 	{
@@ -101,23 +105,14 @@ void Map::deletePellet(std::pair<int, int> position) {
 	glGenVertexArrays(1, &p_vao);
 	glBindVertexArray(p_vao);
 
-	glGenBuffers(1, &p_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, p_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof_v(*p_points), &(*p_points)[0], GL_STATIC_DRAW);
-
 	// location=0 -> position
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 0));
 
 	// location=1 -> Color
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 2));
-
-	// Element buffer object
-	glGenBuffers(1, &p_ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p_ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof_v(*p_indices), &(*p_indices)[0], GL_STATIC_DRAW);
-
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
+	*/
 }
 
 /**
@@ -171,7 +166,6 @@ void Map::initPellets() {
 	float levitationHeight = 0.5f;
 
 	// Makes Vertex Buffer Object
-	p_indices = new std::vector<unsigned int>;
 	p_points = new std::vector<float>;
 
 	for (int y = 0; y < height; y++) {
@@ -183,7 +177,12 @@ void Map::initPellets() {
 
 			std::pair<float, float> origo = getScreenCoords(x + (tileSize / 2.f), y - (tileSize / 2.f));
 
-			float	degw = 2.f * PI / (float)p_slices;
+			p_points->push_back(origo.first);
+			p_points->push_back(origo.second);
+			p_points->push_back(levitationHeight);
+			p_points->push_back(1.f); p_points->push_back(1.f); p_points->push_back(0.f);
+
+			/*float	degw = 2.f * PI / (float)p_slices;
 
 			for (int i = 0; i < p_slices; i++) {
 				float	deg0 = degw * (float)i,
@@ -193,21 +192,24 @@ void Map::initPellets() {
 				p_points->push_back(origo.second);
 				p_points->push_back(levitationHeight);
 				p_points->push_back(1.f); p_points->push_back(1.f); p_points->push_back(0.f);
+				p_points->push_back(0.f); p_points->push_back(0.f);
 
 				p_points->push_back(origo.first + cos(deg0) * p_radius);
 				p_points->push_back(origo.second + sin(deg0) * p_radius);
 				p_points->push_back(levitationHeight);
 				p_points->push_back(1.f); p_points->push_back(1.f); p_points->push_back(0.f);
+				p_points->push_back(0.f); p_points->push_back(0.f);
 
 				p_points->push_back(origo.first + cos(deg) * p_radius);
 				p_points->push_back(origo.second + sin(deg) * p_radius);
 				p_points->push_back(levitationHeight);
 				p_points->push_back(1.f); p_points->push_back(1.f); p_points->push_back(0.f);
+				p_points->push_back(0.f); p_points->push_back(0.f);
 
 				p_indices->push_back(p_indices->size());
 				p_indices->push_back(p_indices->size());
 				p_indices->push_back(p_indices->size());
-			}
+			}*/
 		}
 	}
 
@@ -223,10 +225,7 @@ void Map::initPellets() {
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
 
-	// Element buffer object
-	glGenBuffers(1, &p_ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, p_ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof_v(*p_indices), &(*p_indices)[0], GL_STATIC_DRAW);
+
 }
 
 /**
