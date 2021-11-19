@@ -15,8 +15,8 @@ private:
 	float								speed = 5.f;
 	Map* map;
 	int									movementAnimation = 20;
-	char								direction = ' ';
-	char								directionView = ' ';
+	char								direction = 'U';
+	char								directionView = 'U';
 public:
 	Sprites						(Map* map);
 	~Sprites					();
@@ -48,8 +48,7 @@ public:
 
 class Ghosts : public Sprites {
 private:
-	GLuint								ghost_amount = 1,
-										ghost_Shader,
+	GLuint								ghost_Shader,
 										ghost_vbo,
 										ghost_vao,
 										ghost_ebo;
@@ -69,7 +68,6 @@ public:
 	Ghosts(Map* map, GLuint shader);
 	~Ghosts();
 
-	int getGhostAmount()						{ return ghost_amount; }
 	std::pair<float, float> getGhostPos(int nr) { return sprite_positions[nr]; }
 
 	virtual bool checkIfGameIsDone(bool ghostCollision);

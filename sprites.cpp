@@ -6,6 +6,7 @@
 #include <random>
 #include <math.h>
 
+#include "headers/OBJLoader.h"
 #include "headers/map.h"
 #include "headers/sprites.h"
 #include "glm/glm/gtc/type_ptr.hpp"
@@ -142,7 +143,7 @@ bool Ghosts::checkIfGameIsDone(bool ghostCollision) {
  */
 void Ghosts::drawGhosts() {
 	glBindVertexArray(ghost_vao);	// Tell the code which VAO to use
-	glDrawElements(GL_TRIANGLES, ghost_indices->size(), GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, ghost_points->size() / 8);
 }
 
 /**
@@ -152,7 +153,7 @@ GLuint Ghosts::initGhost(time_t seed) {
 	glGenVertexArrays(1, &ghost_vao);
 	glBindVertexArray(ghost_vao);
 
-	/*
+	
 	// Load object med OBJLOAD og bruk dataen du får av det istedenfor det som er kommentert over
    // Read our .obj file
 	OBJLoader obj;
@@ -160,21 +161,43 @@ GLuint Ghosts::initGhost(time_t seed) {
 	std::vector< glm::vec2 > uvs;
 	std::vector< glm::vec3 > normals; // Won't be used at the moment.
 
-	//obj.tester();
+	bool res = obj.loadOBJ("../../../../assets/model/monster.obj", vertices, uvs, normals);
 
-	//obj.loadOBJ("test", std::vector<glm::vec3>{}, std::vector<glm::vec2>{}, std::vector<glm::vec3>{});
+	ghost_points = new std::vector<float>;
+	for (int i = 0; i < vertices.size(); i++) {
+		glm::vec3 it = vertices[i];
+		ghost_points->push_back(it.x);
+		ghost_points->push_back(it.y);
+		ghost_points->push_back(it.z);
+		
+		ghost_points->push_back(normals[i].x);
+		ghost_points->push_back(normals[i].y);
+		ghost_points->push_back(normals[i].z);
 
-	bool res = obj.loadOBJ("../../../../assets/model/ghost.obj", vertices, uvs, normals);
-
-
+		ghost_points->push_back(uvs[i].x);		// U
+		ghost_points->push_back(uvs[i].y);		// V
+	}
 
 	glGenBuffers(1, &ghost_vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, ghost_vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof_v(*ghost_points), &(*ghost_points)[0], GL_DYNAMIC_DRAW);
-	*/
+	glBufferData(GL_ARRAY_BUFFER, sizeof_v(*ghost_points), &(*ghost_points)[0], GL_STATIC_DRAW);
+	
+	// Set random positions for the ghosts
+	std::vector<std::vector<int>> checkArray = Sprites::getMap()->getMapArray();
+	srand(seed);
+	
+	int ghostSpawnX, ghostSpawnY;
+	do { // Gets random positions for the ghosts
+		ghostSpawnX = rand() % Sprites::getMap()->getWidth();
+		ghostSpawnY = rand() % Sprites::getMap()->getHeight();
+	} while (checkArray[ghostSpawnY][ghostSpawnX] != 0);
 
-	ghost_points = new std::vector<float>;
+	sprite_positions.push_back(getMap()->getScreenCoords(ghostSpawnX + 0.5f, ghostSpawnY - 0.5f));
+
+	sprite_velX.push_back(0.f);
+	sprite_velY.push_back(0.f);
+
+	/**
 
 	std::vector<std::vector<int>> checkArray = Sprites::getMap()->getMapArray();
 	srand(seed);
@@ -221,22 +244,22 @@ GLuint Ghosts::initGhost(time_t seed) {
 		ghost_points->push_back(3.f/ 4.f);
 
 	//}
+		*/
 
-	glGenBuffers(1, &ghost_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, ghost_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof_v(*ghost_points), &(*ghost_points)[0], GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0); //Enable Location = 0 (Vertices)
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 0));
 
-	glEnableVertexAttribArray(0); //Enable Location = 0 (Point position)
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)(sizeof(float) * 0));
+	glEnableVertexAttribArray(1); //Enable Location = 1 (Normals)
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 3));
 
-	glEnableVertexAttribArray(1); //Enable Location = 1 (Color)
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)(sizeof(float) * 2));
+	glEnableVertexAttribArray(2); //Enable Location = 2 (UVs)
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 6));
 
-	glEnableVertexAttribArray(2); //Enable Location = 2 (Tex position)
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)(sizeof(float) * 5));
 
+
+	/**
 	ghost_indices = new std::vector<unsigned int>;
-	//for (int i = 0; i < ghost_amount; i++) {
+	for (int i = 0; i < ghost_points->size(); i+= 5) {
 		ghost_indices->push_back(0);
 		ghost_indices->push_back(1);
 		ghost_indices->push_back(3);
@@ -244,12 +267,12 @@ GLuint Ghosts::initGhost(time_t seed) {
 		ghost_indices->push_back(1);
 		ghost_indices->push_back(2);
 		ghost_indices->push_back(3);
-	//}
+	}
 
 	glGenBuffers(1, &ghost_ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ghost_ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof_v(*ghost_indices), &(*ghost_indices)[0], GL_DYNAMIC_DRAW);
-
+	*/
 	
 	return ghost_vao;
 }
@@ -302,9 +325,10 @@ void Ghosts::movement(GLFWwindow* window, double dt, bool gameStatus, time_t see
 	Animate ghosts
 */
 void Ghosts::ghostAnimate() {
-
+	
+	/* Finn en bedre måte å cleane på >:(
 	Sprites::getMap()->CleanVAO(ghost_vao);
-
+	
 	// Change the texture coordinates based on the direction
 	switch (Sprites::getDirection()) {
 	case 'U': heightY = (2.f / 4.f); break;		// UP
@@ -342,12 +366,12 @@ void Ghosts::ghostAnimate() {
 	// Texture coordinates
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)(sizeof(float) * 5));
-
+	/**
 	glGenBuffers(1, &ghost_ebo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ghost_ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof_v(*ghost_indices), &(*ghost_indices)[0], GL_DYNAMIC_DRAW);
 	glBindVertexArray(0);
-
+	*/
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -374,6 +398,7 @@ Pacman::~Pacman() {
  */
 bool Pacman::checkGhostCollision(std::vector<Ghosts*> ghosts, float posX, float posY) {
 
+	
 	std::pair<int, int> pacmanTile = coordsToTile(posX, posY);
 
 	for (int i = 0; i < ghosts.size(); i++) {
@@ -675,9 +700,12 @@ bool Pacman::movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts
 		if (checkPelletCollision(currentTile))
 			Sprites::getMap()->deletePellet(currentTile);
 		
+		
 		if (checkGhostCollision(ghosts, pacPos2.first, pacPos2.second))
 					gameDone = true;
-	
+					
+
+		gameDone = false;
 
 
 		if (Sprites::getMovAni() == 30) {

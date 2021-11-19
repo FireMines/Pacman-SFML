@@ -6,6 +6,7 @@
 #include <set>
 #include <vector>
 #include <fstream>
+#include <iostream>
 
 #include "headers/OBJLoader.h"
 
@@ -25,7 +26,6 @@ bool OBJLoader::loadOBJ(
     std::vector< glm::vec3 > temp_normals;
 
     // std::ifstream in(path);
-
     FILE* file = fopen(path, "r");
     if (file == NULL) {
         printf("Impossible to open the file !\n");
@@ -81,7 +81,16 @@ bool OBJLoader::loadOBJ(
 
                 unsigned int vertexIndex = vertexIndices[i];
                 glm::vec3 vertex = temp_vertices[vertexIndex - 1];
+
                 out_vertices.push_back(vertex);
+
+                unsigned int uvIndex = uvIndices[i];
+                glm::vec2 uv = temp_uvs[uvIndex - 1];
+                out_uvs.push_back(uv);
+
+                unsigned int normalIndex = normalIndices[i];
+                glm::vec3 normal = temp_normals[normalIndex - 1];
+                out_normals.push_back(normal);
             }
         }
     }

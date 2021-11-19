@@ -62,8 +62,10 @@ add_executable(Pacman
     main.cpp
     map.cpp
     sprites.cpp
+    OBJLoader.cpp
     headers/map.h
     headers/sprites.h
+    headers/OBJLoader.h
     shaders/spriteShader.h
     )
 
@@ -104,3 +106,15 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_SOURCE_DIR}/assets/walls.png
   ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/walls.png)
+
+  add_custom_command(
+  TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_SOURCE_DIR}/assets/model/snowman.obj
+  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/model/monster.obj)
+
+  add_custom_command(
+  TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy
+  ${CMAKE_SOURCE_DIR}/assets/model/minecraft.png
+  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/model/minecraft.png)

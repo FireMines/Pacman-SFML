@@ -24,7 +24,7 @@
 #include "shaders/spriteShader.h"
 
 int windowWidth, windowHeight, sizePerSquare = 20.f;
-int ghost_amount = 0;
+int ghost_amount = 10;
 
 std::string filePath = "../../../../levels/level0"; //CHANGE THIS IF YOU WANT TO LOAD A DIFFERENT MAP
 
@@ -90,7 +90,7 @@ int main() {
 
 	GLuint sprite_shaderprogram = CompileShader(spriteVertexShaderSrc,
 		spriteFragmentShaderSrc);
-
+	
 	double currentTime = 0.0;	// Sets a current time variable
 	glfwSetTime(0.0);			// Resets time
 
@@ -104,6 +104,7 @@ int main() {
 
 	auto spriteSheet = load_opengl_texture("assets/pacman.png", 0);
 	auto wallTexture = load_opengl_texture("assets/walls.png", 0);
+	auto ghostSheet  = load_opengl_texture("assets/model/minecraft.png", 0);
 
 	// Create a texture coordinate as an aditional attribute for the square vertices
 	auto pacmanVAO = pacman.initPacman();
@@ -112,11 +113,15 @@ int main() {
 	std::vector<GLuint> ghost_shaderprograms;
 	std::vector<Ghosts*> ghosts;
 	std::vector<GLuint> ghostVAOs; 
+
 	for (int i = 0; i < ghost_amount; i++) {
-		ghost_shaderprograms.push_back(CompileShader(spriteVertexShaderSrc,
-			spriteFragmentShaderSrc));
-		ghosts.push_back(new Ghosts(&map, ghost_shaderprograms[i]));
-		ghostVAOs.push_back(ghosts[i]->initGhost(time(nullptr) + i));
+		GLuint	shader	 = CompileShader(modelVertexShaderSrc, modelFragmentShaderSrc);
+		Ghosts* ghost	 = new Ghosts(&map, shader);
+		GLuint	ghostVao = ghost->initGhost(time(nullptr) + i);
+
+		ghost_shaderprograms.push_back(shader);
+		ghosts.push_back(ghost);
+		ghostVAOs.push_back(ghostVao);
 	}
 
 	bool gameDone = false;		// true if game is done 
@@ -173,11 +178,12 @@ int main() {
 		gameDone = pacman.movement(window, dt, ghosts, gameDone);
 		
 		for (int i = 0; i < ghost_amount; i++) {
+			
 			auto samplerSlotLocation1 = glGetUniformLocation(ghost_shaderprograms[i], "uTextureA");
 			glUseProgram(ghost_shaderprograms[i]);
 			glBindVertexArray(ghostVAOs[i]);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, spriteSheet);
+			glBindTexture(GL_TEXTURE_2D, ghostSheet);
 
 			ghosts[i]->drawGhosts();
 			ghosts[i]->movement(window, dt, gameDone, time(nullptr) + i);
