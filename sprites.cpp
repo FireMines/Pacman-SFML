@@ -152,6 +152,28 @@ GLuint Ghosts::initGhost(time_t seed) {
 	glGenVertexArrays(1, &ghost_vao);
 	glBindVertexArray(ghost_vao);
 
+	/*
+	// Load object med OBJLOAD og bruk dataen du får av det istedenfor det som er kommentert over
+   // Read our .obj file
+	OBJLoader obj;
+	std::vector< glm::vec3 > vertices;
+	std::vector< glm::vec2 > uvs;
+	std::vector< glm::vec3 > normals; // Won't be used at the moment.
+
+	//obj.tester();
+
+	//obj.loadOBJ("test", std::vector<glm::vec3>{}, std::vector<glm::vec2>{}, std::vector<glm::vec3>{});
+
+	bool res = obj.loadOBJ("../../../../assets/model/ghost.obj", vertices, uvs, normals);
+
+
+
+	glGenBuffers(1, &ghost_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, ghost_vbo);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices[0], GL_STATIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, sizeof_v(*ghost_points), &(*ghost_points)[0], GL_DYNAMIC_DRAW);
+	*/
+
 	ghost_points = new std::vector<float>;
 
 	std::vector<std::vector<int>> checkArray = Sprites::getMap()->getMapArray();

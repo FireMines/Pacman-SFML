@@ -143,19 +143,21 @@ layout (triangle_strip, max_vertices=384) out;
 in vec4 vColor[];
 in mat4 vTransformation[];
 
+out vec3 gNormals;
 out vec4 gColor;
 
 void main(){
 	gColor = vColor[0];
 	mat4 gTransform = vTransformation[0];
 
-	float PI = 3.14159265358979323846264;  //unused
+	float PI = 3.14159265358979323846264;  
 
     vec4 pos = gl_in[0].gl_Position;  //introduce a single vertex at the origin
 
-
 	float x, y, z, xy; 
 	float radius = 0.05f;
+	float nx, ny, nz, lengthInv = 1.0f / radius;   
+
 	int sectorCount = 8;
 	int stackCount = 8;
 
@@ -164,6 +166,7 @@ void main(){
 	float sectorAngle, stackAngle;
 
 	vec3 spherePos[8][8];
+	vec3 sphereNormals[8][8];
 
 	for(int i = 0; i < stackCount; ++i)
 	{
@@ -181,6 +184,12 @@ void main(){
 			x = xy * cos(sectorAngle);             // r * cos(u) * cos(v)
 			y = xy * sin(sectorAngle);             // r * cos(u) * sin(v)
 			spherePos[j][i] = vec3(x, y, z);
+
+			// normalized vertex normal (nx, ny, nz)
+			nx = x * lengthInv;
+			ny = y * lengthInv;
+			nz = z * lengthInv;
+			sphereNormals[j][i] = vec3(nx, ny, nz);
 		}
 	}
 	for(int i = 0; i < stackCount; i++){
@@ -203,8 +212,11 @@ void main(){
 			EmitVertex();
 			gl_Position = gTransform * vec4(v3.x+pos.x, v3.y+pos.y, v3.z+pos.z, pos.w);
 			EmitVertex();
+		
+			
 		}
 	} 
+
 	EndPrimitive();
 }
 )";
@@ -213,10 +225,19 @@ static const std::string pelletFragmentShaderSrc = R"(
 #version 430 core
 
 in vec4		gColor;
+in vec3		gNormals;
+
+vec3 ambientColor = vec3(1.f, 1.f, 0.f);
+
 out vec4	FragColor;
 
-void main() {		
-		FragColor = gColor;	
+void main() {
+
+		//ambient lighting		
+		float ambientStrength = 0.1f;
+		vec3 ambient = ambientStrength * ambientColor;
+	
+		FragColor = vec4(ambient, 1.f) * gColor;	
 }
 )";
 
