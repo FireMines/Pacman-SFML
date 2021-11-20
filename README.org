@@ -21,3 +21,9 @@ Members: Lars Blütecher Holter, Lillian Alice Wangerud, Matthias David Greeven
 	)
 	
 	Launch the program via the Pacman.exe file, and enjoy :)
+
+	NOTE:
+
+	We discovered an issue on the 20th November 2021, that our method of generating spherical pellets only works
+	on AMD GPU's, not NVIDIA GPU's. This is a problem that is out of our control due to hardware differences on
+	our workstations. Likewise, our fullscreen application / hotkey only works on NVIDIA GPU's, not AMD GPU's.
