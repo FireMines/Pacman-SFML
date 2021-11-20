@@ -92,6 +92,8 @@ void Map::deletePellet(std::pair<int, int> position) {
 	p_active[position.second][position.first] = false;
 	p_count--;
 
+	std::cout << p_count << std::endl;
+
 	int range = 6;
 	int index = p_positions[position];
 
