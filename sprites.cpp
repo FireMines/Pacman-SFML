@@ -106,8 +106,6 @@ void Sprites::moveAllToShader(float offsetX, float offsetY , const float& radian
 	// Gets the variable in the shader which 'transforms' stuff (moves, scales, etc)
 	GLuint projmat = glGetUniformLocation(shaderprogram, "u_TransformationMat");
 
-	// Creates transformasjonsmatrix, translation
-	//glm::mat4 transformation = glm::translate(glm::mat4(1), glm::vec3(offsetX, offsetY, 0.f));
 
 	//Translation moves our object.        base matrix      Vector for movement along each axis
 	glm::mat4 translate = glm::translate(glm::mat4(1), glm::vec3(offsetX, offsetY, 0.f));

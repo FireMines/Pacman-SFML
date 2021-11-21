@@ -92,29 +92,9 @@ void Map::deletePellet(std::pair<int, int> position) {
 	p_active[position.second][position.first] = false;
 	p_count--;
 
-	//std::cout << p_count << std::endl;
-
 	int range = 6;
 	int index = p_positions[position];
 
-	/*CleanVAO(p_vao);
-
-	for (int i = index; i < index + range; i++)
-	{
-		p_points->at(i) = 0.f;
-	}
-
-	glGenVertexArrays(1, &p_vao);
-	glBindVertexArray(p_vao);
-
-	// location=0 -> position
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 0));
-
-	// location=1 -> Color
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
-	*/
 }
 
 /**
@@ -184,34 +164,6 @@ void Map::initPellets() {
 			p_points->push_back(levitationHeight);
 			p_points->push_back(1.f); p_points->push_back(1.f); p_points->push_back(0.f);
 
-			/*float	degw = 2.f * PI / (float)p_slices;
-
-			for (int i = 0; i < p_slices; i++) {
-				float	deg0 = degw * (float)i,
-					deg = degw * (float)(i + 1);
-
-				p_points->push_back(origo.first);
-				p_points->push_back(origo.second);
-				p_points->push_back(levitationHeight);
-				p_points->push_back(1.f); p_points->push_back(1.f); p_points->push_back(0.f);
-				p_points->push_back(0.f); p_points->push_back(0.f);
-
-				p_points->push_back(origo.first + cos(deg0) * p_radius);
-				p_points->push_back(origo.second + sin(deg0) * p_radius);
-				p_points->push_back(levitationHeight);
-				p_points->push_back(1.f); p_points->push_back(1.f); p_points->push_back(0.f);
-				p_points->push_back(0.f); p_points->push_back(0.f);
-
-				p_points->push_back(origo.first + cos(deg) * p_radius);
-				p_points->push_back(origo.second + sin(deg) * p_radius);
-				p_points->push_back(levitationHeight);
-				p_points->push_back(1.f); p_points->push_back(1.f); p_points->push_back(0.f);
-				p_points->push_back(0.f); p_points->push_back(0.f);
-
-				p_indices->push_back(p_indices->size());
-				p_indices->push_back(p_indices->size());
-				p_indices->push_back(p_indices->size());
-			}*/
 		}
 	}
 
@@ -252,39 +204,6 @@ void Map::initVerts() {
 			float isBlue = 0.f;
 			if (mapArr[y][x] == 1) isBlue = 1.f;		
 
-			/* Tile wall */
-			/*
-			// South Left FLOOR
-			points->push_back(botLeft.first); points->push_back(botLeft.second); points->push_back(0.f);	//X, Y and Z Coordinates
-			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);						//RGB
-			points->push_back(0.f);	points->push_back(0.f);													//Tex coords
-
-			// South Right FLOOR
-			points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second); points->push_back(0.f);
-			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
-			points->push_back(0.f);	points->push_back(0.f);
-
-			// North Left FLOOR
-			points->push_back(botLeft.first + tileSize); points->push_back(botLeft.second + tileSize); points->push_back(0.f);
-			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
-			points->push_back(0.f);	points->push_back(0.f);
-
-			// North Right FLOOR
-			points->push_back(botLeft.first); points->push_back(botLeft.second + tileSize); points->push_back(0.f);
-			points->push_back(0.f); points->push_back(0.f); points->push_back(isBlue);
-			points->push_back(0.f);	points->push_back(0.f);
-
-			// -----FLOOR TILES INDICES-----
-
-			indices->push_back(i + 0);
-			indices->push_back(i + 1);	
-			indices->push_back(i + 3);	
-
-			indices->push_back(i + 1);
-			indices->push_back(i + 2);	
-			indices->push_back(i + 3);
-			i += 4;
-			*/
 			// DRAW WALLS IF IT IS A WALL TILE
 			if (isBlue == 1.0f) {
 
@@ -430,19 +349,6 @@ void Map::initVerts() {
 	// location = 2 -> textures
 	glEnableVertexAttribArray(2);
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 6) );
-
-	/*
-	// Connects indices to points to make two triangles
-	indices = new std::vector<unsigned int>;
-	for (int i = 0; i < width * height; i++) {
-		indices->push_back(i*4 + 0);	// i=1 => 4
-		indices->push_back(i*4 + 1);	// i=1 => 5
-		indices->push_back(i*4 + 2);	// i=1 => 7
-
-		indices->push_back(i*4 + 1);	// i=1 => 5
-		indices->push_back(i*4 + 2);	// i=1 => 6
-		indices->push_back(i*4 + 3);	// i=1 => 7
-	}*/
 
 	// Element buffer object
 	glGenBuffers(1, &ebo); 
