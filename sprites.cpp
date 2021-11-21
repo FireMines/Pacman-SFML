@@ -100,14 +100,22 @@ std::pair<int, int> Sprites::coordsToTile(float x, float y) {
 /**
  *	Moves everything in the shader with offsetX and offsetY
  */
-void Sprites::moveAllToShader(float offsetX, float offsetY, GLuint shaderprogram) {
+void Sprites::moveAllToShader(float offsetX, float offsetY , const float& radians, GLuint shaderprogram) {
 	glUseProgram(shaderprogram);
 
 	// Gets the variable in the shader which 'transforms' stuff (moves, scales, etc)
 	GLuint projmat = glGetUniformLocation(shaderprogram, "u_TransformationMat");
 
 	// Creates transformasjonsmatrix, translation
-	glm::mat4 transformation = glm::translate(glm::mat4(1), glm::vec3(offsetX, offsetY, 0.f));
+	//glm::mat4 transformation = glm::translate(glm::mat4(1), glm::vec3(offsetX, offsetY, 0.f));
+
+	//Translation moves our object.        base matrix      Vector for movement along each axis
+	glm::mat4 translate = glm::translate(glm::mat4(1), glm::vec3(offsetX, offsetY, 0.f));
+
+	//Rotate the object            base matrix      degrees to rotate   axis to rotate around
+	glm::mat4 rotate = glm::rotate(glm::mat4(1), radians, { (0.f),(0.f),(1.f) });
+
+	glm::mat4 transformation = translate * rotate;
 
 	// Updates transform-variable with our translation
 	glUniformMatrix4fv(projmat, 1, false, glm::value_ptr(transformation));
@@ -229,85 +237,6 @@ GLuint Ghosts::LoadModel(const std::string path)
 	return VAO;
 }
 
-// -----------------------------------------------------------------------------
-// Code handling Transformations
-// -----------------------------------------------------------------------------
-void Ghosts::Transform(
-	const GLuint shaderprogram,
-	const glm::vec3& translation,
-	const float& radians,
-	const glm::vec3& rotation_axis,
-	const glm::vec3& scale
-)
-{
-
-	//Presentation below purely for ease of viewing individual components of calculation, and not at all necessary.
-
-	//Translation moves our object.        base matrix      Vector for movement along each axis
-	glm::mat4 translate = glm::translate(glm::mat4(1), translation);
-
-	//Rotate the object            base matrix      degrees to rotate   axis to rotate around
-	glm::mat4 rotate = glm::rotate(glm::mat4(1), radians, rotation_axis);
-
-	//Scale the object             base matrix      vector containing how much to scale along each axis (here the same for all axis)
-	glm::mat4 scaling = glm::scale(glm::mat4(1), scale);
-
-	//Create transformation matrix      These must be multiplied in this order, or the results will be incorrect
-	glm::mat4 transformation = translate * rotate * scaling;
-
-
-	//Get uniform to place transformation matrix in
-	//Must be called after calling glUseProgram     shader program in use   Name of Uniform
-	GLuint transformationmat = glGetUniformLocation(shaderprogram, "u_TransformationMat");
-
-	//Send data from matrices to uniform
-	//We also add a check to make sure that we found the location of the matrix before trying to write to it
-	if (transformationmat != -1)
-		//                     Location of uniform  How many matrices we are sending    value_ptr to our transformation matrix
-		glUniformMatrix4fv(transformationmat, 1, false, glm::value_ptr(transformation));
-}
-
-
-// -----------------------------------------------------------------------------
-// Code handling the Lighting
-// -----------------------------------------------------------------------------
-void Ghosts::Light(
-	const GLuint shaderprogram,
-	const glm::vec3 pos,
-	const glm::vec3 color,
-	const glm::mat4 light_Projection,
-	const glm::vec3 look_at,
-	const glm::vec3 up_vec,
-	const float spec
-)
-{
-
-	//Get uniforms for our Light-variables.
-	GLuint lightPos = glGetUniformLocation(shaderprogram, "u_LightPosition");
-	GLuint lightColor = glGetUniformLocation(shaderprogram, "u_LightColor");
-	GLuint lightDir = glGetUniformLocation(shaderprogram, "u_LightDirection");
-	GLuint specularity = glGetUniformLocation(shaderprogram, "u_Specularity");
-	GLuint lightSpace = glGetUniformLocation(shaderprogram, "u_LightSpaceMat");
-
-	//Make some computations that would be cumbersome to inline
-	//Here we figure out the combination of the projection and viewmatrixes for the lightsource
-	glm::mat4 lightLookat = glm::lookAt(pos, look_at, glm::vec3(0.0f, 1.f, 0.f));
-	glm::mat4 lightspacematrix = light_Projection * lightLookat;
-
-	//Send Variables to our shader
-	if (lightPos != -1)
-		glUniform3f(lightPos, pos.x, pos.y, pos.z);             //Position of a point in space. For Point lights.
-	if (lightDir != -1)
-		glUniform3f(lightDir, 0 - pos.x, 0 - pos.y, 0 - pos.z); //Direction vector. For Directional Lights.
-	if (lightColor != -1)
-		glUniform3f(lightColor, color.r, color.g, color.b);     //RGB values
-	if (specularity != -1)
-		glUniform1f(specularity, spec);                         //How much specular reflection we have for our object
-
-	//Values for Shadow computation
-	if (lightSpace != -1)
-		glUniformMatrix4fv(lightSpace, 1, false, glm::value_ptr(lightspacematrix));
-}
 
 
 /**
@@ -331,82 +260,6 @@ GLuint Ghosts::initGhost(time_t seed) {
 	sprite_velX.push_back(0.f);
 	sprite_velY.push_back(0.f);
 
-	/**
-
-	std::vector<std::vector<int>> checkArray = Sprites::getMap()->getMapArray();
-	srand(seed);
-
-	//for (int i = 0; i < ghost_amount; i++) {
-
-		int ghostSpawnX, ghostSpawnY;
-		do { // Gets random positions for the ghosts
-			ghostSpawnX = rand() % Sprites::getMap()->getWidth();
-			ghostSpawnY = rand() % Sprites::getMap()->getHeight();
-		} while (checkArray[ghostSpawnY][ghostSpawnX] != 0);
-
-		sprite_positions.push_back(getMap()->getScreenCoords(ghostSpawnX + 0.5f, ghostSpawnY - 0.5f));
-
-		sprite_velX.push_back(0.f);
-		sprite_velY.push_back(0.f);
-
-		// Bottom Left
-		ghost_points->push_back(-0.5f);
-		ghost_points->push_back(-0.5f);
-		ghost_points->push_back(1.f); ghost_points->push_back(1.f); ghost_points->push_back(0.f);
-		ghost_points->push_back(4.f/6.f);
-		ghost_points->push_back(1.f); // 4.f/4.f
-
-		// Bottom Right
-		ghost_points->push_back(-0.5f + Sprites::getMap()->getTileSize());
-		ghost_points->push_back(-0.5f);
-		ghost_points->push_back(1.f); ghost_points->push_back(1.f); ghost_points->push_back(0.f);
-		ghost_points->push_back(5.f/6.f);
-		ghost_points->push_back(1.f);
-
-		// Top Right
-		ghost_points->push_back(-0.5f + Sprites::getMap()->getTileSize());
-		ghost_points->push_back(-0.5f + Sprites::getMap()->getTileSize());
-		ghost_points->push_back(1.f); ghost_points->push_back(1.f); ghost_points->push_back(0.f);
-		ghost_points->push_back(5.f / 6.f);
-		ghost_points->push_back(3.f / 4.f);
-
-		// Top Left
-		ghost_points->push_back(-0.5f);
-		ghost_points->push_back(-0.5f + Sprites::getMap()->getTileSize());
-		ghost_points->push_back(1.f); ghost_points->push_back(1.f); ghost_points->push_back(0.f);
-		ghost_points->push_back(4.f / 6.f);
-		ghost_points->push_back(3.f/ 4.f);
-
-	//}
-
-
-	glEnableVertexAttribArray(0); //Enable Location = 0 (Vertices)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 0));
-
-	glEnableVertexAttribArray(1); //Enable Location = 1 (Normals)
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 3));
-
-	glEnableVertexAttribArray(2); //Enable Location = 2 (UVs)
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 6));
-
-	*/
-
-	/**
-	ghost_indices = new std::vector<unsigned int>;
-	for (int i = 0; i < ghost_points->size(); i+= 5) {
-		ghost_indices->push_back(0);
-		ghost_indices->push_back(1);
-		ghost_indices->push_back(3);
-
-		ghost_indices->push_back(1);
-		ghost_indices->push_back(2);
-		ghost_indices->push_back(3);
-	}
-
-	glGenBuffers(1, &ghost_ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ghost_ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof_v(*ghost_indices), &(*ghost_indices)[0], GL_DYNAMIC_DRAW);
-	*/
 	glBindVertexArray(potVAO);
 	glDrawArrays(GL_TRIANGLES, 6, getSize());
 	return potVAO;
@@ -416,6 +269,7 @@ GLuint Ghosts::initGhost(time_t seed) {
  *	Initializes movement of a sprite
  */
 void Ghosts::movement(GLFWwindow* window, double dt, bool gameStatus, time_t seed) {
+	float rotation = 0.0f;
 	if (!checkIfGameIsDone(gameStatus)) {
 		srand(seed);
 
@@ -426,21 +280,25 @@ void Ghosts::movement(GLFWwindow* window, double dt, bool gameStatus, time_t see
 				Sprites::setDirection('U');
 				sprite_velX.at(i) = 0;
 				sprite_velY.at(i) = Sprites::getSpeed();
+				rotation = 0.0f;
 				break;
 			case 1:
 				Sprites::setDirection('D');
 				sprite_velX.at(i) = 0;
 				sprite_velY.at(i) = -Sprites::getSpeed();
+				rotation = 180.0f;
 				break;
 			case 2:
 				Sprites::setDirection('R');
 				sprite_velX.at(i) = Sprites::getSpeed();
 				sprite_velY.at(i) = 0;
+				rotation = 270.0f;
 				break;
 			case 3:
 				Sprites::setDirection('L');
 				sprite_velX.at(i) = -Sprites::getSpeed();
 				sprite_velY.at(i) = 0;
+				rotation = 90.0f;
 				break;
 			}
 
@@ -449,65 +307,11 @@ void Ghosts::movement(GLFWwindow* window, double dt, bool gameStatus, time_t see
 				sprite_positions.at(i).second += sprite_velY.at(i) * dt;
 			}
 
-			ghostAnimate();
-		
-			moveAllToShader(sprite_positions.at(i).first, sprite_positions.at(i).second, ghost_Shader);
+			moveAllToShader(sprite_positions.at(i).first, sprite_positions.at(i).second, glm::radians(rotation), ghost_Shader);
 		}
 	}
 }
 
-/*
-	Animate ghosts
-*/
-void Ghosts::ghostAnimate() {
-	
-	/* Finn en bedre måte å cleane på >:(
-	Sprites::getMap()->CleanVAO(ghost_vao);
-	
-	// Change the texture coordinates based on the direction
-	switch (Sprites::getDirection()) {
-	case 'U': heightY = (2.f / 4.f); break;		// UP
-	case 'D': heightY = (1.f / 4.f); break;		// DOWN
-	case 'L': heightY = (3.f / 4.f); break;		// LEFT
-	case 'R': heightY = (1); break;				// RIGHT
-	}
-
-	//Bottom left
-	ghost_points->at(5) = widthX; ghost_points->at(6) = heightY;
-
-	//Bottom Right
-	ghost_points->at(12) = widthX + (1.f / 6.f); ghost_points->at(13) = heightY;
-
-	//Top Right
-	ghost_points->at(19) = widthX + (1.f / 6.f); ghost_points->at(20) = heightY - (1.f / 4.f);
-
-	//Top Left
-	ghost_points->at(26) = widthX; ghost_points->at(27) = heightY - (1.f / 4.f);
-
-
-	glGenVertexArrays(1, &ghost_vao);
-	glGenBuffers(1, &ghost_vbo);
-	glBindVertexArray(this->ghost_vao);
-	glBindBuffer(GL_ARRAY_BUFFER, ghost_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof_v(*ghost_points), &(*ghost_points)[0], GL_DYNAMIC_DRAW);
-
-	// Set position into the Shader
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)(sizeof(float) * 0));
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)(sizeof(float) * 2));
-
-	// Texture coordinates
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 7, (void*)(sizeof(float) * 5));
-	/**
-	glGenBuffers(1, &ghost_ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ghost_ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof_v(*ghost_indices), &(*ghost_indices)[0], GL_DYNAMIC_DRAW);
-	glBindVertexArray(0);
-	*/
-}
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -836,12 +640,12 @@ bool Pacman::movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts
 			Sprites::getMap()->deletePellet(currentTile);
 		
 		
+
+		
+
 		if (checkGhostCollision(ghosts, pacPos2.first, pacPos2.second))
 					gameDone = true;
-					
-
 		gameDone = false;
-
 
 		if (Sprites::getMovAni() == 30) {
 			pacAnimate(); Sprites::setMovAni(0);
@@ -849,7 +653,7 @@ bool Pacman::movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts
 
 		Sprites::setMovAni(Sprites::getMovAni() + 1);
 
-		moveAllToShader(pacPos2.first, pacPos2.second, pacman_Shader);
+		moveAllToShader(pacPos2.first, pacPos2.second, 0.0f,pacman_Shader);
 	}
 
 	return gameDone;

@@ -36,7 +36,7 @@ public:
 	void  setMovAni(int newMovAni)	{ movementAnimation = newMovAni; }
 	
 
-	void moveAllToShader(float offsetX, float offsetY, GLuint shaderprogram);
+	void moveAllToShader(float offsetX, float offsetY, const float& radians, GLuint shaderprogram);
 
 	std::pair<int, int> Sprites::coordsToTile(float x, float y);
 
@@ -63,8 +63,7 @@ private:
 	bool								increaseStep = true;
 	int									Step = 0;
 	int									size = 0;
-	float								widthX = (4.f / 6.f),	// Each sprite i divided into 6ths on the X axis
-										heightY = (1.f / 4.f);	// divided into 4ths on the Y axis
+	
 
 //------------------------------------------------------------------------------
 // VERTEX STRUCT
@@ -85,30 +84,12 @@ public:
 	int			 getSize() { return size; }
 	void		 setSize(int newSize) { size = newSize; }
 	void		 drawGhosts();
-	void         ghostAnimate();
 	GLuint		 initGhost(time_t seed);
 	GLuint		 LoadModel(const std::string path);
 	GLuint		 setpotVAO(GLuint modelFunction) { potVAO = modelFunction; }
 	virtual void movement(GLFWwindow* window, double dt, bool gameStatus, time_t seed);
 	virtual bool checkIfGameIsDone(bool ghostCollision);
 
-	void		 Light(
-		const GLuint shaderprogram,
-		const glm::vec3 pos = { 0.1f, 1.f, 0.f },
-		const glm::vec3 color = { 1.f,1.f,1.f },
-		const glm::mat4 light_Projection = glm::ortho(-10.f, 10.f, -10.f, 10.f, 0.f, 10.f),
-		const glm::vec3 look_at = { 0.f,0.f,0.f },
-		const glm::vec3 up_vec = { 0.f,1.f,0.f },
-		const float specularity = 1.f
-	);
-
-	void Transform(
-		const GLuint shaderprogram,
-		const glm::vec3& translation = { 0.f,0.f,0.f },
-		const float& radians = 0.f,
-		const glm::vec3& rotation_axis = { 0.f,1.f,0.f },
-		const glm::vec3& scale = { 1.f,1.f,1.f }
-	);
 };
 
 
