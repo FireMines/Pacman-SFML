@@ -227,17 +227,11 @@ static const std::string pelletFragmentShaderSrc = R"(
 in vec4		gColor;
 in vec3		gNormals;
 
-vec3 ambientColor = vec3(1.f, 1.f, 0.f);
-
 out vec4	FragColor;
 
 void main() {
-
-		//ambient lighting		
-		float ambientStrength = 0.1f;
-		vec3 ambient = ambientStrength * ambientColor;
 	
-		FragColor = vec4(ambient, 1.f) * gColor;	
+		FragColor = gColor;	
 }
 )";
 
@@ -252,12 +246,22 @@ layout (location = 2) in vec2 inTexCoords;
 uniform mat4 u_TransformationMat = mat4(1);
 uniform mat4 u_ViewMat           = mat4(1);
 uniform mat4 u_ProjectionMat     = mat4(1);
+uniform mat4 u_LightSpaceMat     = mat4(1);
 
+out vec4 vPos;
+out vec3 vnormals;
+out vec4 LightSpacePos;
 out vec2 TexCoords;
 
 void main() {
-	/**Posisjon basert på transforamtions of kamera*/
-	gl_Position = u_ProjectionMat * u_ViewMat * u_TransformationMat * vec4(aPos, 1.0f);
+	vPos = vec4(aPos, 1.0);
+
+	LightSpacePos = u_LightSpaceMat *  u_TransformationMat * vPos;
+
+	mat3 normalmatrix = transpose(inverse(mat3(u_ViewMat * u_TransformationMat)));
+	vnormals = normalize(normalmatrix * normalize(aNormals));
+
+	gl_Position = u_ProjectionMat * u_ViewMat * u_TransformationMat * vPos;
 	TexCoords	= inTexCoords;
 }
 )";
@@ -266,96 +270,51 @@ void main() {
 static const std::string modelFragmentShaderSrc = R"(
 #version 430 core
 
-in vec2		TexCoords;
-out vec4	FragColor;
+in vec4 vPos;
+in vec3 vnormals;
+in vec4 LightSpacePos;
+in vec2	TexCoords;
 
+uniform mat4 u_TransformationMat = mat4(1);
+uniform mat4 u_ViewMat = mat4(1);
+
+uniform vec3  u_LightColor;
+uniform vec3  u_LightDirection;
+uniform float u_Specularity;
 uniform		sampler2D image;
 
-void main() {
-		
-		vec4 colorTest = texture(image, TexCoords);
-		if(colorTest.a < 0.1) discard;
-		else{FragColor = colorTest;}
-		
-}
-)";
+out vec4	FragColor;
 
-static const std::string VertexShaderSrc = R"(
-#version 430 core
-
-layout(location = 0) in vec3 a_Position;
-layout(location = 1) in vec3 a_normals;
-//layout(location = 2) in vec2 a_texture; Incase we want to add textures to our model later.
-
-//We specify our uniforms. We do not need to specify locations manually, but it helps with knowing what is bound where.
-layout(location=0) uniform mat4 u_TransformationMat = mat4(1);
-layout(location=1) uniform mat4 camMatrix           = mat4(1);
-layout(location=2) uniform mat4 u_LightSpaceMat     = mat4(1);
-
-out vec4 vertexPositions;
-out vec3 normals;
-out vec4 FragPosLightSpace;
-
-void main() {
-
-//We need these in a different shader later down the pipeline, so we need to send them along. Can't just call in a_Position unfortunately.
-vertexPositions = vec4(a_Position, 1.0);
-
-//We also need them in Lightspace, so we compute that here
-FragPosLightSpace = u_LightSpaceMat *  u_TransformationMat * vertexPositions;
-
-normals = a_normals;
-
-//We multiply our matrices with our position to change the positions of vertices to their final destinations.
-gl_Position = camMatrix * u_TransformationMat * vertexPositions;
-}
-)";
-
-static const std::string directionalLightFragmentShaderSrc = R"(
-#version 430 core
-
-in vec4 vertexPositions;
-in vec3 normals;
-in vec4 FragPosLightSpace;
-
-out vec4 color;
-
-uniform vec4 u_Color;
-uniform vec3 u_LightColor;
-uniform vec3 u_LightDirection;
-uniform float u_Specularity;
-
-vec3 DirectionalLight(in vec3 color, in vec3 direction, in float shadow) {
-
-    //Ambient lighting. Ambient light is light that is present even when normally no light should shine upon that part of the object. 
-    //This is the poor mans way of simulating light reflecting from other surfaces in the room. For those that don't want to get into more advanced lighting models.
+vec3 DirectionalLight(
+    in vec3 color,
+    in vec3 direction
+)
+{
     float ambient_strength = 0.1;
     vec3 ambient = ambient_strength * color;
     
-    //Diffuse lighting. Light that scatters in all directions after hitting the object.
-    vec3 dir_to_light = normalize(-direction);                                          //First we get the direction from the object to the lightsource ( which is of course the opposite of the direction of the light)
-    vec3 diffuse = color * max(0.0, dot(normals, dir_to_light));                         //Then we find how strongly the light scatters in different directions, with a minimum of 0.0, via the normals and the direction we just found.
+    vec3 dir_to_light = normalize(-direction);                                         
+    vec3 diffuse = color * max(0.0, dot(vnormals, dir_to_light));                         
     
-    vec3 reflectionDirection = reflect(dir_to_light,normals);                                                         //And then we find the angle between the direction of the light and the direction from surface to camera
+    vec3 viewDirection = normalize(vec3(inverse(u_ViewMat) * vec4(0,0,0,1) - u_TransformationMat *  vPos));
     
-    vec3 specular = u_Specularity * reflectionDirection * color;                                                           //Finally, multiply with how reflective the surface is and add the color.
+    vec3 reflectionDirection = reflect(dir_to_light, vnormals);             
     
-    //We make sure to mutilply diffuse and specular with how shadowed our vertex is
-    //The 1-shadow is not really necessary for this, but the values coming from the ShadowCalculation can be updated to give smoother transitions between shadows
-    //In which case this might be usefull
-    return ambient +(1.0-shadow) * (diffuse + specular);
+    float specular_power = pow(max(0.0,dot(viewDirection,reflectionDirection)),32);         
+    vec3 specular = u_Specularity * specular_power * color;                     
+    
+    return ambient +(1.0) * (diffuse + specular);
 }
 
 void main() {
+		
+		vec3 light = DirectionalLight(u_LightColor,u_LightDirection);
 
-//Then send them to the lightfunction
-vec3 light = DirectionalLight(u_LightColor,u_LightDirection, 0.0f);
-
-//Finally, multiply with the color. Make sure the vector still has the same dimensions. Alpha channel is set to 1 here, because our object is not transparent. Might be different if you use a texture.
-color = u_Color * vec4(light, 1.0);
+		vec4 colorTest = texture(image, TexCoords);
+		if(colorTest.a < 0.1) discard;
+		else{FragColor = colorTest * vec4(light, 1.0);}
+		
 }
-
-
 )";
 
 #endif // __SQUARE_H_

@@ -24,7 +24,7 @@
 #include "shaders/spriteShader.h"
 
 int windowWidth, windowHeight, sizePerSquare = 20.f;
-int ghost_amount = 10;
+int ghost_amount = 25;
 
 std::string filePath = "../../../../levels/level0"; //CHANGE THIS IF YOU WANT TO LOAD A DIFFERENT MAP
 
@@ -36,7 +36,13 @@ void GLAPIENTRY
 MessageCallback				(GLenum source, GLenum type, GLuint id,
 							 GLenum severity, GLsizei length,
 							 const GLchar* message, const void* userParam);
-
+void Light					(const GLuint shaderprogram,
+							 const glm::vec3 pos = { -1.f, 1.f, 0.f },
+							 const glm::vec3 color = { 1.f,1.f,1.f },
+							 const glm::mat4 light_Projection = glm::ortho(-1.f, 1.f, -1.f, 1.f, 0.01f, 2.f),
+							 const glm::vec3 look_at = { 0.f,0.f,0.f },
+							 const glm::vec3 up_vec = { 0.f,1.f,0.f },
+							 const float specularity = 0.2f);
 
 static void key_callback	(GLFWwindow* window, int key, int scancode, int action, int mods);
 
@@ -193,6 +199,7 @@ int main() {
 			ghosts[i]->drawGhosts();
 			ghosts[i]->movement(window, dt, gameDone, time(nullptr) + i);
 			Camera(ghost_shaderprograms[i]);
+			Light(ghost_shaderprograms[i]);
 		}
 
 		Camera(shader_program);
@@ -310,6 +317,46 @@ GLuint CompileShader(const std::string& vertexShaderSrc,
 	return shaderProgram;
 }
 
+// -----------------------------------------------------------------------------
+// Code handling the Lighting
+// -----------------------------------------------------------------------------
+void Light(
+	const GLuint shaderprogram,
+	const glm::vec3 pos,
+	const glm::vec3 color,
+	const glm::mat4 light_Projection,
+	const glm::vec3 look_at,
+	const glm::vec3 up_vec,
+	const float spec
+)
+{
+
+	//Get uniforms for our Light-variables.
+	GLuint lightPos = glGetUniformLocation(shaderprogram, "u_LightPosition");
+	GLuint lightColor = glGetUniformLocation(shaderprogram, "u_LightColor");
+	GLuint lightDir = glGetUniformLocation(shaderprogram, "u_LightDirection");
+	GLuint specularity = glGetUniformLocation(shaderprogram, "u_Specularity");
+	GLuint lightSpace = glGetUniformLocation(shaderprogram, "u_LightSpaceMat");
+
+	//Make some computations that would be cumbersome to inline
+	//Here we figure out the combination of the projection and viewmatrixes for the lightsource
+	glm::mat4 lightLookat = glm::lookAt(pos, look_at, glm::vec3(0.0f, 1.f, 0.f));
+	glm::mat4 lightspacematrix = light_Projection * lightLookat;
+
+	//Send Variables to our shader
+	if (lightPos != -1)
+		glUniform3f(lightPos, pos.x, pos.y, pos.z);             //Position of a point in space. For Point lights.
+	if (lightDir != -1)
+		glUniform3f(lightDir, 0 - pos.x, 0 - pos.y, 0 - pos.z); //Direction vector. For Directional Lights.
+	if (lightColor != -1)
+		glUniform3f(lightColor, color.r, color.g, color.b);     //RGB values
+	if (specularity != -1)
+		glUniform1f(specularity, spec);                         //How much specular reflection we have for our object
+
+	//Values for Shadow computation
+	if (lightSpace != -1)
+		glUniformMatrix4fv(lightSpace, 1, false, glm::value_ptr(lightspacematrix));
+}
 
 /**
  *	Error callback
