@@ -111,7 +111,7 @@ add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy
   ${CMAKE_SOURCE_DIR}/assets/model/snowman.obj
-  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/model/monster.obj)
+  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/model/snowman.obj)
 
   add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
