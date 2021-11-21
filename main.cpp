@@ -150,12 +150,11 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
 			if (!fullscreen) {
 				fullscreen = true;
-				//glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), NULL, windowWidth, windowWidth, windowHeight, 60);
-				std::cout << glfwGetPrimaryMonitor() << std::endl;
+				glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), NULL, NULL, windowWidth, windowHeight, 60);
 			}
 			else {
 				fullscreen = false;
-				glfwSetWindowMonitor(window, NULL, NULL, windowWidth, windowWidth, windowHeight, 60);
+				glfwSetWindowMonitor(window, NULL, NULL, NULL, windowWidth, windowHeight, 60);
 			}
 		}
 
