@@ -32,6 +32,10 @@ void Camera					(const GLuint shaderprogram);
 void setWindowSize			(std::string filePath);
 void error_callback			(int error, const char* description);
 void mouse_callback			(GLFWwindow* window, double xpos, double ypos);
+void GLAPIENTRY
+MessageCallback				(GLenum source, GLenum type, GLuint id,
+							 GLenum severity, GLsizei length,
+							 const GLchar* message, const void* userParam);
 
 
 static void key_callback	(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -78,6 +82,7 @@ int main() {
 	// Tells openGL which callback functions we use
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
+	glDebugMessageCallback(MessageCallback, 0);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
@@ -370,3 +375,20 @@ void setWindowSize(std::string filePath) {
 	windowHeight = windowHeight * sizePerSquare;
 }
 
+// -----------------------------------------------------------------------------
+// MessageCallback (for debugging purposes)
+// -----------------------------------------------------------------------------
+void GLAPIENTRY
+MessageCallback(GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam)
+{
+	std::cerr << "GL CALLBACK:" << (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "") <<
+		"type = 0x" << type <<
+		", severity = 0x" << severity <<
+		", message =" << message << "\n";
+}

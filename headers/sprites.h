@@ -8,6 +8,8 @@
 #include <string>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 
 
 class Sprites {
@@ -50,10 +52,9 @@ class Ghosts : public Sprites {
 private:
 	GLuint								ghost_Shader,
 										ghost_vbo,
-										ghost_vao,
-										ghost_ebo;
+										potVAO;
+
 	std::vector<float>*					ghost_points;
-	std::vector<unsigned int>*			ghost_indices;
 
 	std::vector<std::pair<float, float>>sprite_positions;
 	std::vector<float>					sprite_velX;
@@ -61,8 +62,19 @@ private:
 
 	bool								increaseStep = true;
 	int									Step = 0;
+	int									size = 0;
 	float								widthX = (4.f / 6.f),	// Each sprite i divided into 6ths on the X axis
 										heightY = (1.f / 4.f);	// divided into 4ths on the Y axis
+
+//------------------------------------------------------------------------------
+// VERTEX STRUCT
+//------------------------------------------------------------------------------
+	struct Vertex
+	{
+		glm::vec3 location;
+		glm::vec3 normals;
+		glm::vec2 texCoords;
+	};
 
 public:
 	Ghosts(Map* map, GLuint shader);
@@ -70,12 +82,35 @@ public:
 
 	std::pair<float, float> getGhostPos(int nr) { return sprite_positions[nr]; }
 
-	virtual bool checkIfGameIsDone(bool ghostCollision);
+	int			 getSize() { return size; }
+	void		 setSize(int newSize) { size = newSize; }
 	void		 drawGhosts();
-	GLuint		 initGhost(time_t seed);
-	virtual void movement(GLFWwindow* window, double dt, bool gameStatus, time_t seed);
 	void         ghostAnimate();
+	GLuint		 initGhost(time_t seed);
+	GLuint		 LoadModel(const std::string path);
+	GLuint		 setpotVAO(GLuint modelFunction) { potVAO = modelFunction; }
+	virtual void movement(GLFWwindow* window, double dt, bool gameStatus, time_t seed);
+	virtual bool checkIfGameIsDone(bool ghostCollision);
+
+	void		 Light(
+		const GLuint shaderprogram,
+		const glm::vec3 pos = { 0.1f, 1.f, 0.f },
+		const glm::vec3 color = { 1.f,1.f,1.f },
+		const glm::mat4 light_Projection = glm::ortho(-10.f, 10.f, -10.f, 10.f, 0.f, 10.f),
+		const glm::vec3 look_at = { 0.f,0.f,0.f },
+		const glm::vec3 up_vec = { 0.f,1.f,0.f },
+		const float specularity = 1.f
+	);
+
+	void Transform(
+		const GLuint shaderprogram,
+		const glm::vec3& translation = { 0.f,0.f,0.f },
+		const float& radians = 0.f,
+		const glm::vec3& rotation_axis = { 0.f,1.f,0.f },
+		const glm::vec3& scale = { 1.f,1.f,1.f }
+	);
 };
+
 
 class Pacman : public Sprites {
 private:

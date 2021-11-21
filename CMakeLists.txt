@@ -50,6 +50,8 @@ add_subdirectory(glad)
 
 add_subdirectory(glm)
 
+add_subdirectory(tinyobjloader)
+
 # Up to this point we have either found or built our dependencies--
 
 # Add a new executable to our project (lab02), which
@@ -62,10 +64,8 @@ add_executable(Pacman
     main.cpp
     map.cpp
     sprites.cpp
-    OBJLoader.cpp
     headers/map.h
     headers/sprites.h
-    headers/OBJLoader.h
     shaders/spriteShader.h
     )
 

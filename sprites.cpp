@@ -1,3 +1,5 @@
+#define TINYOBJLOADER_IMPLEMENTATION //This needs to be defined exactly once so that tinyOBJ will work
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <string>
@@ -6,7 +8,7 @@
 #include <random>
 #include <math.h>
 
-#include "headers/OBJLoader.h"
+#include "tinyobjloader/tiny_obj_loader.h"
 #include "headers/map.h"
 #include "headers/sprites.h"
 #include "glm/glm/gtc/type_ptr.hpp"
@@ -126,9 +128,8 @@ Ghosts::Ghosts(Map* map, GLuint shader) : Sprites(map) {
  */
 Ghosts::~Ghosts() {
 	delete ghost_points;
-	delete ghost_indices;
 
-	Sprites::getMap()->CleanVAO(ghost_vao);
+	Sprites::getMap()->CleanVAO(potVAO);
 }
 
 /**
@@ -142,50 +143,183 @@ bool Ghosts::checkIfGameIsDone(bool ghostCollision) {
  *	Draws the sprites
  */
 void Ghosts::drawGhosts() {
-	glBindVertexArray(ghost_vao);	// Tell the code which VAO to use
-	glDrawArrays(GL_TRIANGLES, 0, ghost_points->size() / 8);
+	glBindVertexArray(potVAO);	// Tell the code which VAO to use
+	glDrawArrays(GL_TRIANGLES, 6, getSize());
 }
+
+// -----------------------------------------------------------------------------
+// Code handling the camera
+// -----------------------------------------------------------------------------
+GLuint Ghosts::LoadModel(const std::string path)
+{
+
+	//We create a vector of Vertex structs. OpenGL can understand these, and so will accept them as input.
+	std::vector<Vertex> vertices;
+
+	//Some variables that we are going to use to store data from tinyObj
+	tinyobj::attrib_t attrib;
+	std::vector<tinyobj::shape_t> shapes;
+	std::vector<tinyobj::material_t> materials; //This one goes unused for now, seeing as we don't need materials for this model.
+
+	//Some variables incase there is something wrong with our obj file
+	std::string warn;
+	std::string err;
+
+	//We use tinobj to load our models. Feel free to find other .obj files and see if you can load them.
+	tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, (path + "/monster.obj").c_str(), path.c_str());
+
+	if (!warn.empty()) {
+		std::cout << warn << std::endl;
+	}
+
+	if (!err.empty()) {
+		std::cerr << err << std::endl;
+	}
+
+	//For each shape defined in the obj file
+	for (auto shape : shapes)
+	{
+		//We find each mesh
+		for (auto meshIndex : shape.mesh.indices)
+		{
+			//And store the data for each vertice, including normals
+			glm::vec3 vertice = {
+				attrib.vertices[(meshIndex.vertex_index * 3) + 2],
+				attrib.vertices[meshIndex.vertex_index * 3],
+				attrib.vertices[(meshIndex.vertex_index * 3) + 1]
+			};
+			glm::vec3 normal = {
+				attrib.normals[(meshIndex.normal_index * 3) + 2],
+				attrib.normals[meshIndex.normal_index * 3],
+				attrib.normals[(meshIndex.normal_index * 3) + 1]
+			};
+			glm::vec2 textureCoordinate = {                         //These go unnused, but if you want textures, you will need them.
+				attrib.texcoords[meshIndex.texcoord_index * 2],
+				attrib.texcoords[(meshIndex.texcoord_index * 2) + 1]
+			};
+
+			vertices.push_back({ vertice, normal, textureCoordinate }); //We add our new vertice struct to our vector
+
+		}
+	}
+
+	GLuint VAO;
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	GLuint VBO;
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+
+	//As you can see, OpenGL will accept a vector of structs as a valid input here
+	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, nullptr);
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 3));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 6));
+
+	//This will be needed later to specify how much we need to draw. Look at the main loop to find this variable again.
+	setSize(vertices.size());
+
+	return VAO;
+}
+
+// -----------------------------------------------------------------------------
+// Code handling Transformations
+// -----------------------------------------------------------------------------
+void Ghosts::Transform(
+	const GLuint shaderprogram,
+	const glm::vec3& translation,
+	const float& radians,
+	const glm::vec3& rotation_axis,
+	const glm::vec3& scale
+)
+{
+
+	//Presentation below purely for ease of viewing individual components of calculation, and not at all necessary.
+
+	//Translation moves our object.        base matrix      Vector for movement along each axis
+	glm::mat4 translate = glm::translate(glm::mat4(1), translation);
+
+	//Rotate the object            base matrix      degrees to rotate   axis to rotate around
+	glm::mat4 rotate = glm::rotate(glm::mat4(1), radians, rotation_axis);
+
+	//Scale the object             base matrix      vector containing how much to scale along each axis (here the same for all axis)
+	glm::mat4 scaling = glm::scale(glm::mat4(1), scale);
+
+	//Create transformation matrix      These must be multiplied in this order, or the results will be incorrect
+	glm::mat4 transformation = translate * rotate * scaling;
+
+
+	//Get uniform to place transformation matrix in
+	//Must be called after calling glUseProgram     shader program in use   Name of Uniform
+	GLuint transformationmat = glGetUniformLocation(shaderprogram, "u_TransformationMat");
+
+	//Send data from matrices to uniform
+	//We also add a check to make sure that we found the location of the matrix before trying to write to it
+	if (transformationmat != -1)
+		//                     Location of uniform  How many matrices we are sending    value_ptr to our transformation matrix
+		glUniformMatrix4fv(transformationmat, 1, false, glm::value_ptr(transformation));
+}
+
+
+// -----------------------------------------------------------------------------
+// Code handling the Lighting
+// -----------------------------------------------------------------------------
+void Ghosts::Light(
+	const GLuint shaderprogram,
+	const glm::vec3 pos,
+	const glm::vec3 color,
+	const glm::mat4 light_Projection,
+	const glm::vec3 look_at,
+	const glm::vec3 up_vec,
+	const float spec
+)
+{
+
+	//Get uniforms for our Light-variables.
+	GLuint lightPos = glGetUniformLocation(shaderprogram, "u_LightPosition");
+	GLuint lightColor = glGetUniformLocation(shaderprogram, "u_LightColor");
+	GLuint lightDir = glGetUniformLocation(shaderprogram, "u_LightDirection");
+	GLuint specularity = glGetUniformLocation(shaderprogram, "u_Specularity");
+	GLuint lightSpace = glGetUniformLocation(shaderprogram, "u_LightSpaceMat");
+
+	//Make some computations that would be cumbersome to inline
+	//Here we figure out the combination of the projection and viewmatrixes for the lightsource
+	glm::mat4 lightLookat = glm::lookAt(pos, look_at, glm::vec3(0.0f, 1.f, 0.f));
+	glm::mat4 lightspacematrix = light_Projection * lightLookat;
+
+	//Send Variables to our shader
+	if (lightPos != -1)
+		glUniform3f(lightPos, pos.x, pos.y, pos.z);             //Position of a point in space. For Point lights.
+	if (lightDir != -1)
+		glUniform3f(lightDir, 0 - pos.x, 0 - pos.y, 0 - pos.z); //Direction vector. For Directional Lights.
+	if (lightColor != -1)
+		glUniform3f(lightColor, color.r, color.g, color.b);     //RGB values
+	if (specularity != -1)
+		glUniform1f(specularity, spec);                         //How much specular reflection we have for our object
+
+	//Values for Shadow computation
+	if (lightSpace != -1)
+		glUniformMatrix4fv(lightSpace, 1, false, glm::value_ptr(lightspacematrix));
+}
+
 
 /**
  *	Initialises ghosts with all its values
  */
 GLuint Ghosts::initGhost(time_t seed) {
-	glGenVertexArrays(1, &ghost_vao);
-	glBindVertexArray(ghost_vao);
 
-	
-	// Load object med OBJLOAD og bruk dataen du får av det istedenfor det som er kommentert over
-   // Read our .obj file
-	OBJLoader obj;
-	std::vector< glm::vec3 > vertices;
-	std::vector< glm::vec2 > uvs;
-	std::vector< glm::vec3 > normals; // Won't be used at the moment.
+	potVAO = LoadModel("../../../../assets/model");
 
-	bool res = obj.loadOBJ("../../../../assets/model/monster.obj", vertices, uvs, normals);
-
-	ghost_points = new std::vector<float>;
-	for (int i = 0; i < vertices.size(); i++) {
-		glm::vec3 it = vertices[i];
-		ghost_points->push_back(it.x);
-		ghost_points->push_back(it.y);
-		ghost_points->push_back(it.z);
-		
-		ghost_points->push_back(normals[i].x);
-		ghost_points->push_back(normals[i].y);
-		ghost_points->push_back(normals[i].z);
-
-		ghost_points->push_back(uvs[i].x);		// U
-		ghost_points->push_back(uvs[i].y);		// V
-	}
-
-	glGenBuffers(1, &ghost_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, ghost_vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof_v(*ghost_points), &(*ghost_points)[0], GL_STATIC_DRAW);
-	
 	// Set random positions for the ghosts
 	std::vector<std::vector<int>> checkArray = Sprites::getMap()->getMapArray();
 	srand(seed);
-	
 	int ghostSpawnX, ghostSpawnY;
 	do { // Gets random positions for the ghosts
 		ghostSpawnX = rand() % Sprites::getMap()->getWidth();
@@ -206,7 +340,7 @@ GLuint Ghosts::initGhost(time_t seed) {
 
 		int ghostSpawnX, ghostSpawnY;
 		do { // Gets random positions for the ghosts
-			ghostSpawnX = rand() % Sprites::getMap()->getWidth();										
+			ghostSpawnX = rand() % Sprites::getMap()->getWidth();
 			ghostSpawnY = rand() % Sprites::getMap()->getHeight();
 		} while (checkArray[ghostSpawnY][ghostSpawnX] != 0);
 
@@ -244,7 +378,7 @@ GLuint Ghosts::initGhost(time_t seed) {
 		ghost_points->push_back(3.f/ 4.f);
 
 	//}
-		*/
+
 
 	glEnableVertexAttribArray(0); //Enable Location = 0 (Vertices)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 0));
@@ -255,7 +389,7 @@ GLuint Ghosts::initGhost(time_t seed) {
 	glEnableVertexAttribArray(2); //Enable Location = 2 (UVs)
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 6));
 
-
+	*/
 
 	/**
 	ghost_indices = new std::vector<unsigned int>;
@@ -273,8 +407,9 @@ GLuint Ghosts::initGhost(time_t seed) {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ghost_ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof_v(*ghost_indices), &(*ghost_indices)[0], GL_DYNAMIC_DRAW);
 	*/
-	
-	return ghost_vao;
+	glBindVertexArray(potVAO);
+	glDrawArrays(GL_TRIANGLES, 6, getSize());
+	return potVAO;
 }
 
 /**

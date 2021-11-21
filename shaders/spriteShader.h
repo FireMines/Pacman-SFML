@@ -245,7 +245,8 @@ static const std::string modelVertexShaderSrc = R"(
 #version 430 core
 
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec2 inTexCoords;
+layout (location = 1) in vec3 aNormals;
+layout (location = 2) in vec2 inTexCoords;
 
 /**Matixer trengt til kamera og transformasjoner*/
 uniform mat4 u_TransformationMat = mat4(1);
@@ -277,6 +278,84 @@ void main() {
 		else{FragColor = colorTest;}
 		
 }
+)";
+
+static const std::string VertexShaderSrc = R"(
+#version 430 core
+
+layout(location = 0) in vec3 a_Position;
+layout(location = 1) in vec3 a_normals;
+//layout(location = 2) in vec2 a_texture; Incase we want to add textures to our model later.
+
+//We specify our uniforms. We do not need to specify locations manually, but it helps with knowing what is bound where.
+layout(location=0) uniform mat4 u_TransformationMat = mat4(1);
+layout(location=1) uniform mat4 camMatrix           = mat4(1);
+layout(location=2) uniform mat4 u_LightSpaceMat     = mat4(1);
+
+out vec4 vertexPositions;
+out vec3 normals;
+out vec4 FragPosLightSpace;
+
+void main() {
+
+//We need these in a different shader later down the pipeline, so we need to send them along. Can't just call in a_Position unfortunately.
+vertexPositions = vec4(a_Position, 1.0);
+
+//We also need them in Lightspace, so we compute that here
+FragPosLightSpace = u_LightSpaceMat *  u_TransformationMat * vertexPositions;
+
+normals = a_normals;
+
+//We multiply our matrices with our position to change the positions of vertices to their final destinations.
+gl_Position = camMatrix * u_TransformationMat * vertexPositions;
+}
+)";
+
+static const std::string directionalLightFragmentShaderSrc = R"(
+#version 430 core
+
+in vec4 vertexPositions;
+in vec3 normals;
+in vec4 FragPosLightSpace;
+
+out vec4 color;
+
+uniform vec4 u_Color;
+uniform vec3 u_LightColor;
+uniform vec3 u_LightDirection;
+uniform float u_Specularity;
+
+vec3 DirectionalLight(in vec3 color, in vec3 direction, in float shadow) {
+
+    //Ambient lighting. Ambient light is light that is present even when normally no light should shine upon that part of the object. 
+    //This is the poor mans way of simulating light reflecting from other surfaces in the room. For those that don't want to get into more advanced lighting models.
+    float ambient_strength = 0.1;
+    vec3 ambient = ambient_strength * color;
+    
+    //Diffuse lighting. Light that scatters in all directions after hitting the object.
+    vec3 dir_to_light = normalize(-direction);                                          //First we get the direction from the object to the lightsource ( which is of course the opposite of the direction of the light)
+    vec3 diffuse = color * max(0.0, dot(normals, dir_to_light));                         //Then we find how strongly the light scatters in different directions, with a minimum of 0.0, via the normals and the direction we just found.
+    
+    vec3 reflectionDirection = reflect(dir_to_light,normals);                                                         //And then we find the angle between the direction of the light and the direction from surface to camera
+    
+    vec3 specular = u_Specularity * reflectionDirection * color;                                                           //Finally, multiply with how reflective the surface is and add the color.
+    
+    //We make sure to mutilply diffuse and specular with how shadowed our vertex is
+    //The 1-shadow is not really necessary for this, but the values coming from the ShadowCalculation can be updated to give smoother transitions between shadows
+    //In which case this might be usefull
+    return ambient +(1.0-shadow) * (diffuse + specular);
+}
+
+void main() {
+
+//Then send them to the lightfunction
+vec3 light = DirectionalLight(u_LightColor,u_LightDirection, 0.0f);
+
+//Finally, multiply with the color. Make sure the vector still has the same dimensions. Alpha channel is set to 1 here, because our object is not transparent. Might be different if you use a texture.
+color = u_Color * vec4(light, 1.0);
+}
+
+
 )";
 
 #endif // __SQUARE_H_
