@@ -235,8 +235,6 @@ GLuint Ghosts::LoadModel(const std::string path)
 	return VAO;
 }
 
-
-
 /**
  *	Initialises ghosts with all its values
  */
@@ -362,14 +360,6 @@ bool Pacman::checkPelletCollision(std::pair<int, int> currentTile) {
 		return true;
 	else
 		return false;
-}
-
-/**
- *	Draws the sprites
- */
-void Pacman::drawPacman() {
-	glBindVertexArray(pac_vao);			// Tell the code which VAO to use 
-	glDrawElements(GL_TRIANGLES, pac_indices->size(), GL_UNSIGNED_INT, 0);
 }
 
 /**

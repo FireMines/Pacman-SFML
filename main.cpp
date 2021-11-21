@@ -7,11 +7,6 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <random>
-#include <set>
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -24,7 +19,7 @@
 #include "shaders/spriteShader.h"
 
 int windowWidth, windowHeight, sizePerSquare = 20.f;
-int ghost_amount = 25;
+int ghost_amount = 5;
 
 std::string filePath = "../../../../levels/level0"; //CHANGE THIS IF YOU WANT TO LOAD A DIFFERENT MAP
 
@@ -178,13 +173,11 @@ int main() {
 		glUseProgram(pellet_shaderprogram);
 		map.drawPellets();
 
-		// auto samplerSlotLocation0 = glGetUniformLocation(sprite_shaderprogram, "uTextureA");
 		glUseProgram(sprite_shaderprogram);
 		glBindVertexArray(pacmanVAO);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, spriteSheet);
 
-		pacman.drawPacman();
 		gameDone = pacman.movement(window, dt, ghosts, gameDone);
 		
 		for (int i = 0; i < ghost_amount; i++) {

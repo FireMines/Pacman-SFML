@@ -123,7 +123,6 @@ public:
 	Pacman(Map* map, GLuint shader);
 	~Pacman();
 
-	void drawPacman();
 	void pacAnimate();
 	virtual bool movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts, bool gameStatus);
 

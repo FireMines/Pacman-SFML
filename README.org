@@ -6,10 +6,14 @@ Members: Lars Blütecher Holter, Lillian Alice Wangerud, Matthias David Greeven
 
 	We made Pacman with openGL. 
 
-	You move the character around with your arrow keys when you've launched the program
-	(Up, Down, Left and Right).
+	You move the character around with your keys when you've launched the program
+	(W, S, A and D).
 
 	The game will end when you collect all the pellets, and all the sprites on screen will stop.
+
+	To quit the game, press the ESC key on your keyboard.
+
+	For fullscreen to toggle on and off, simply press the F key.
 
 	How to run the program:
 	Clone the repository from Github.
