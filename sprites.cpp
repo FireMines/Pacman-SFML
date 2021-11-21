@@ -166,7 +166,7 @@ GLuint Ghosts::LoadModel(const std::string path)
 	std::string err;
 
 	//We use tinobj to load our models. Feel free to find other .obj files and see if you can load them.
-	tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, (path + "/snowman.obj").c_str(), path.c_str());
+	tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, (path + "/monster.obj").c_str(), path.c_str());
 
 	if (!warn.empty()) {
 		std::cout << warn << std::endl;
