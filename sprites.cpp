@@ -641,11 +641,11 @@ bool Pacman::movement(GLFWwindow* window, double dt, std::vector<Ghosts*> ghosts
 		
 		
 
-		
+		gameDone = false;
 
 		if (checkGhostCollision(ghosts, pacPos2.first, pacPos2.second))
 					gameDone = true;
-		gameDone = false;
+		
 
 		if (Sprites::getMovAni() == 30) {
 			pacAnimate(); Sprites::setMovAni(0);
