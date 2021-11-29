@@ -240,7 +240,7 @@ GLuint Ghosts::LoadModel(const std::string path)
  */
 GLuint Ghosts::initGhost(time_t seed) {
 
-	potVAO = LoadModel("../../../../assets/model");
+	potVAO = LoadModel("../../assets/model");
 
 	// Set random positions for the ghosts
 	std::vector<std::vector<int>> checkArray = Sprites::getMap()->getMapArray();

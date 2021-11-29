@@ -1,32 +1,13 @@
-#+TITLE: Group 17: Assignment 1: Pacman.
+#+TITLE: Evaluation Assignment 2
 
-Members: Lars Blütecher Holter, Lillian Alice Wangerud, Matthias David Greeven
 
-* Introduction
+This is a good work. Is has all the features required and it is efficient on
+rendering. I appreciate very much that you have tried to introduce geometry
+shaders. As I mentioned to you, it did not work on my machine, but I could see
+it works on yours. My only minor comment is that the design could be improved:
+there is still a significant amount of code structured in just your =main.cpp=
+file that could have been structured in classes. You have a segmentation fault
+due to calling OpenGL functions after =glfwTerminate()=. You also have memory
+leaks e.g., here you allocate =tileVAO = new VAO();= but never delete.
 
-	We made Pacman with openGL. 
-
-	You move the character around with your keys when you've launched the program
-	(W, S, A and D).
-
-	The game will end when you collect all the pellets, and all the sprites on screen will stop.
-
-	To quit the game, press the ESC key on your keyboard.
-
-	For fullscreen to toggle on and off, simply press the F key.
-
-	How to run the program:
-	Clone the repository from Github.
-	Generate the CMake list when the files have finished loading in.
-
-	(Should the program fail to load / Cmake list fail to generate, try the following command in
-	your GIT command line:
-	$ git submodule update --init --recursive
-	)
-	
-	Launch the program via the Pacman.exe file, and enjoy :)
-
-	NOTE:
-
-	We discovered an issue on the 20th November 2021, that our method of generating spherical pellets only works
-	on AMD GPU's, not NVIDIA GPU's. 
+My evaluation of this work is: **A**

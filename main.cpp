@@ -18,10 +18,12 @@
 
 #include "shaders/spriteShader.h"
 
-int windowWidth, windowHeight, sizePerSquare = 20.f;
+int windowWidth = 20;
+int windowHeight = 20;
+int sizePerSquare = 20;
 int ghost_amount = 5;
 
-std::string filePath = "../../../../levels/level0"; //CHANGE THIS IF YOU WANT TO LOAD A DIFFERENT MAP
+std::string filePath = "../../levels/level0"; //CHANGE THIS IF YOU WANT TO LOAD A DIFFERENT MAP
 
 void Camera					(const GLuint shaderprogram);
 void setWindowSize			(std::string filePath);

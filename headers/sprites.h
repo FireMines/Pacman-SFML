@@ -38,7 +38,7 @@ public:
 
 	void moveAllToShader(float offsetX, float offsetY, const float& radians, GLuint shaderprogram);
 
-	std::pair<int, int> Sprites::coordsToTile(float x, float y);
+	std::pair<int, int> coordsToTile(float x, float y);
 
 	template <typename T>
 	int sizeof_v(std::vector <T> vec) { 
